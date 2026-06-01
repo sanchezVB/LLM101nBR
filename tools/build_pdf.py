@@ -156,7 +156,11 @@ def render_pdf(inner_html: str, out_path: Path, title: str):
         result = pisa.CreatePDF(html, dest=f, encoding="utf-8")
     if result.err:
         raise RuntimeError(f"Falha ao gerar PDF: {out_path}")
-    print(f"OK  ->  {out_path.relative_to(ROOT)}")
+    try:
+        shown = out_path.relative_to(ROOT)
+    except ValueError:
+        shown = out_path  # destino fora do repo (ex.: area de trabalho)
+    print(f"OK  ->  {shown}")
 
 
 def find_chapter_dir(num: str) -> Path:
@@ -202,14 +206,32 @@ def build_all():
     render_pdf(cover + "".join(parts), DIST_DIR / "LLM101n-BR-Apostila-completa.pdf", "LLM101n-BR")
 
 
+def build_file(md_path: str, out_path: str | None, title: str | None):
+    """Gera PDF de um arquivo Markdown qualquer (ex.: docs/panorama.md)."""
+    src = Path(md_path)
+    if not src.is_absolute():
+        src = (ROOT / md_path).resolve()
+    if not src.exists():
+        raise SystemExit(f"Arquivo nao encontrado: {src}")
+    out = Path(out_path) if out_path else src.with_suffix(".pdf")
+    doc_title = title or src.stem.replace("-", " ").title()
+    html = md_to_html(src.read_text(encoding="utf-8"))
+    render_pdf(html, out, doc_title)
+
+
 def main():
     ap = argparse.ArgumentParser(description="Gera a apostila do curso em PDF.")
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--chapter", help="numero do capitulo, ex.: 01")
     g.add_argument("--all", action="store_true", help="apostila completa")
+    g.add_argument("--file", help="caminho de um .md avulso para virar PDF")
+    ap.add_argument("--out", help="caminho de saida do PDF (use com --file)")
+    ap.add_argument("--title", help="titulo no rodape (use com --file)")
     args = ap.parse_args()
     if args.all:
         build_all()
+    elif args.file:
+        build_file(args.file, args.out, args.title)
     else:
         build_chapter(args.chapter)
 
