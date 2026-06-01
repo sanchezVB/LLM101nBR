@@ -121,8 +121,9 @@ Trabalhados ao longo dos capítulos, conforme aparecem:
 
 | Capítulo | Estado |
 |----------|--------|
-| 01 — Bigram Language Model | ✅ Completo (apostila + código + exercícios) |
-| 02–17 | ⏳ Planejados (syllabus aprovado) |
+| 01 — Bigram Language Model | ✅ Completo (apostila + código + exercícios + PDF) |
+| 02 — Micrograd | ✅ Completo (apostila + código + exercícios + PDF) |
+| 03–17 | ⏳ Planejados (syllabus aprovado) |
 
 > Este repositório é construído **em fases**. O Capítulo 1 é a "fatia vertical" de
 > referência: define o padrão de qualidade (profundidade do texto, estilo do código,
