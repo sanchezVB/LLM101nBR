@@ -17,6 +17,8 @@ _*.log
 _*.txt
 _*.py
 _*.pdf
+_*.csv
+_*.png
 
 # Apostila completa gerada (capitulos individuais SAO versionados;
 # a compilacao completa e' artefato e pode ser regerada com --all)
