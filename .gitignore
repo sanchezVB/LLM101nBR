@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Editores / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Arquivos temporarios de build/diagnostico (prefixados com _)
+_*.log
+_*.txt
+_*.py
+_*.pdf
+
+# Apostila completa gerada (capitulos individuais SAO versionados;
+# a compilacao completa e' artefato e pode ser regerada com --all)
+/dist/

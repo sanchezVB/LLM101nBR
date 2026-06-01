@@ -1,0 +1,6 @@
+# Dependências do curso LLM101n-BR.
+# PyTorch é a única essencial nos primeiros capítulos; numpy e matplotlib
+# são usados para visualizações e análises.
+torch>=2.0
+numpy>=1.24
+matplotlib>=3.7
