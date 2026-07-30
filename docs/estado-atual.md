@@ -7,19 +7,19 @@
 
 ## 1. Resumo executivo
 
-O projeto saiu do zero e tem hoje uma **base sólida e publicada**: a infraestrutura do
-curso está montada e os **2 primeiros capítulos estão completos, testados e no
-GitHub**. Cada capítulo entregue inclui apostila, código executável, exercícios com
+O projeto tem hoje uma **base sólida e publicada**: a **Fase I (Fundamentos) está
+completa** e o Transformer já começou. São **4 capítulos** prontos, testados e no
+GitHub. Cada capítulo entregue inclui apostila, código executável, exercícios com
 soluções e PDF — e todo número citado no texto foi obtido rodando o código de verdade.
 
 | Indicador | Valor |
 |-----------|-------|
-| Capítulos concluídos | **2 de 17** (12%) |
-| Estado | Infraestrutura pronta + Fase I iniciada |
-| Repositório | Publicado e versionado (3 commits) |
-| Arquivos versionados | 22 |
-| Linhas de código (didático) | ~450 (Python) |
-| PDFs gerados | 2 capítulos + este panorama |
+| Capítulos concluídos | **4 de 17** (24%) |
+| Estado | Fase I completa; Fase II (Transformer) iniciada |
+| Repositório | Publicado e versionado (6 commits) |
+| Arquivos versionados | 30 |
+| Linhas de código (didático) | ~1.340 (Python) |
+| PDFs gerados | 4 capítulos + panorama + este relatório |
 | Verificação | 100% do código roda; gradientes do Cap. 2 batem com PyTorch |
 
 ---
@@ -37,6 +37,9 @@ soluções e PDF — e todo número citado no texto foi obtido rodando o código
 | `f091c85` | 01/06/2026 | Estrutura inicial do curso + Capítulo 01 |
 | `58d67ed` | 01/06/2026 | Capítulo 02 — Micrograd |
 | `5fcb0fe` | 01/06/2026 | Panorama do curso + suporte a `--file` no gerador de PDF |
+| `a18b020` | 01/06/2026 | Panorama do estado atual |
+| `0547d63` | 01/06/2026 | Capítulo 03 — N-gram model (MLP) + dataset do IBGE |
+| (atual) | 01/06/2026 | Capítulo 04 — Attention + correções no gerador de PDF |
 
 ---
 
@@ -48,14 +51,14 @@ soluções e PDF — e todo número citado no texto foi obtido rodando o código
 |---|----------|--------|
 | 01 | Bigram Language Model | **Concluído** |
 | 02 | Micrograd | **Concluído** |
-| 03 | N-gram model | A fazer (próximo) |
+| 03 | N-gram model (MLP) | **Concluído** |
 
 ### Fase II — O Transformer
 
 | # | Capítulo | Estado |
 |---|----------|--------|
-| 04 | Attention | A fazer |
-| 05 | Transformer | A fazer |
+| 04 | Attention | **Concluído** |
+| 05 | Transformer | A fazer (próximo) |
 | 06 | Tokenization | A fazer |
 | 07 | Optimization | A fazer |
 
@@ -88,12 +91,12 @@ soluções e PDF — e todo número citado no texto foi obtido rodando o código
 
 | Fase | Concluídos | % |
 |------|-----------|---|
-| I — Fundamentos | 2 / 3 | 67% |
-| II — Transformer | 0 / 4 | 0% |
+| I — Fundamentos | 3 / 3 | **100%** |
+| II — Transformer | 1 / 4 | 25% |
 | III — Velocidade e escala | 0 / 4 | 0% |
 | IV — Inferência e refinamento | 0 / 4 | 0% |
 | V — Produto e além | 0 / 2 | 0% |
-| **TOTAL** | **2 / 17** | **12%** |
+| **TOTAL** | **4 / 17** | **24%** |
 
 ---
 
@@ -128,6 +131,39 @@ Conteúdo (9 páginas no PDF):
 **Validação rigorosa:** os gradientes do nosso motor **batem com os do PyTorch até a
 6ª casa decimal** (`ALL MATCH: True`).
 
+### Capítulo 03 — N-gram model (MLP)
+
+Conteúdo (9 páginas no PDF):
+
+- **Apostila** (`README.md`) — a maldição da dimensionalidade, embeddings, `view`,
+  `matmul`, GELU, `cross_entropy`, mini-batches e **treino/validação/teste**.
+- **`mlp.py`** (~150 linhas) — MLP char-level em PyTorch. Loss **1,97** nos três
+  splits (praticamente idênticas = generaliza), **batendo o bigrama** (~2,4).
+- **`prepare_data.py`** + **`names.txt`** — dataset real de **64 mil nomes** do IBGE.
+- **`exercicios.md`** — 7 exercícios; solução E5 incluída.
+
+**Decisão de projeto:** o dataset de 155 nomes dos capítulos anteriores causava
+*overfitting* severo (treino 0,80 vs validação 6,51). Trocá-lo pela base do IBGE foi o
+que tornou o capítulo honesto — e o contraste virou a lição central, demonstrada na
+solução do E5.
+
+### Capítulo 04 — Attention
+
+Conteúdo (10 páginas no PDF):
+
+- **Apostila** (`README.md`) — o mecanismo em 4 versões equivalentes (média em loop →
+  matmul com `tril` → softmax mascarado → **query/key/value**), a escala `1/√d`, a
+  máscara causal e o embedding posicional.
+- **`attention.py`** — as 4 versões, com prova de equivalência entre elas.
+- **`model.py`** — modelo de linguagem com atenção; constante `USE_FEEDFORWARD` para
+  o experimento central do capítulo.
+- **`exercicios.md`** — 7 exercícios; solução E6 (inspeção dos pesos) incluída.
+
+**Descoberta honesta:** com parâmetros equiparados, a atenção **sozinha perde** do MLP
+(2,099 vs 1,967) — porque ela **comunica** mas não **computa**. Adicionando o
+feedforward, cai para **1,913**. Isso motiva diretamente o Capítulo 5: o Transformer é
+a combinação das duas metades.
+
 ---
 
 ## 5. Infraestrutura montada
@@ -157,21 +193,45 @@ Práticas aplicadas em todo capítulo entregue:
 
 - **Código sempre executado** antes de documentar — nenhum número é inventado.
 - **Comparação com PyTorch** onde faz sentido (Cap. 2: gradientes idênticos).
+- **Comparações justas** — modelos comparados com orçamento de parâmetros equivalente;
+  quando não é possível, isso é declarado no texto (Cap. 4).
 - **PDFs inspecionados** visualmente (acentuação, formatação, código).
 - **Versionamento limpo** — arquivos temporários ignorados; commits descritivos.
+
+**Defeitos encontrados e corrigidos nesta rodada** (achados durante a inspeção visual
+dos PDFs, afetavam todos os capítulos):
+
+1. **Código virava linha corrida** — o `xhtml2pdf` ignora `white-space: pre-wrap` e
+   colapsava as quebras de linha. Corrigido convertendo quebras em `<br/>` e
+   indentação em espaços rígidos.
+2. **Setas `→` desapareciam** — eram removidas junto com os emojis, alterando o sentido
+   do texto (`Neuron → Layer` virava `Neuron Layer`). Agora são mapeadas para `->`.
+3. **Diagramas de árvore viravam quadrados pretos** — as fontes do PDF não cobrem
+   caracteres de desenho de caixa. Agora convertidos para ASCII (`+--`).
+4. **Rede de segurança adicionada** — o gerador agora **avisa** se encontrar qualquer
+   caractere sem cobertura na fonte, em vez de falhar silenciosamente.
 
 ---
 
 ## 7. Próximo passo
 
-**Capítulo 03 — N-gram model.** Voltar ao problema de gerar nomes do Capítulo 1, mas
-trocando o bigrama por um **MLP** que olha vários caracteres de contexto, já em
-**PyTorch de verdade** (embeddings, `matmul`, ativação GELU). É a ponte do modelo de
-brinquedo para o modelo de verdade, e usa diretamente o que foi construído nos
-capítulos 1 (modelo de linguagem) e 2 (como uma rede aprende).
+**Capítulo 05 — Transformer.** O Capítulo 4 terminou com as duas metades na mão:
+**comunicação** (atenção) e **computação** (feedforward). O próximo capítulo junta as
+duas num **bloco**, adiciona **múltiplas cabeças** de atenção, **conexões residuais** e
+**layer normalization**, e empilha tudo em profundidade — chegando à arquitetura do
+GPT-2.
+
+### Sobre os capítulos 8–10 (velocidade e escala)
+
+Um ponto a resolver quando chegarmos lá: a máquina tem uma **AMD Radeon RX 7600**, mas
+o PyTorch instalado é a build de CPU e o caminho CUDA não se aplica a placas AMD. O
+`torch-directml` (que roda em GPU AMD no Windows) **não tem versão para Python 3.14**.
+Alternativa concreta: instalar um **Python 3.12 paralelo** só para esses capítulos.
+O Capítulo 10 (treino distribuído) exige múltiplas GPUs para um teste real, mas a
+*mecânica* do `all-reduce` pode ser verificada com múltiplos processos na CPU.
 
 ### Sugestão de ritmo
 
 Mantendo o padrão atual (1 capítulo = apostila + código testado + exercícios +
-soluções + PDF + commit), a Fase I fica completa com o próximo capítulo, e o curso
-segue capítulo a capítulo na ordem do syllabus.
+soluções + PDF + commit), o curso segue capítulo a capítulo na ordem do syllabus. Cada
+capítulo termina publicado e consistente, então é seguro parar entre capítulos.

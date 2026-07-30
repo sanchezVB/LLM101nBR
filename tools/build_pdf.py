@@ -33,24 +33,55 @@ DIST_DIR = ROOT / "dist"
 # Emoji handling: as fontes base-14 nao tem glifos de emoji. Trocamos os
 # conhecidos por texto e removemos qualquer outro para nao virar quadrado.
 # --------------------------------------------------------------------------
+# As fontes base-14 do PDF cobrem WinAnsi (cp1252). Tudo fora disso corre o risco
+# de virar quadrado preto -- ou, pior, de ser apagado silenciosamente e mudar o
+# sentido do texto. Por isso mapeamos explicitamente para equivalentes ASCII.
 EMOJI_REPLACEMENTS = {
+    # emojis e dingbats
     "✅": "[OK]",
     "⏳": "[...]",
     "➡️": "->",
     "➡": "->",
+    "►": ">",
     "🎯": "",
     "🚀": "",
     "🔑": "",
     "⚠️": "(!)",
     "⚠": "(!)",
+    # setas (NUNCA apagar: elas carregam significado, ex.: "Neuron -> Layer")
+    "→": "->",
+    "←": "<-",
+    "↔": "<->",
+    "⇒": "=>",
+    # desenho de caixa (arvores de diretorio) -> ASCII
+    "─": "-",
+    "│": "|",
+    "├": "+",
+    "└": "\\",
+    "┌": "+",
+    "┐": "+",
+    "┘": "+",
+    "┤": "+",
+    "┬": "+",
+    # sobrescritos/matematica sem cobertura
+    "ᵀ": "T",
+    "⁰": "0",
+    "⁴": "4",
+    "⁵": "5",
+    "⁶": "6",
+    "⁷": "7",
+    "⁸": "8",
+    "⁹": "9",
 }
+# Rede de seguranca: remove o que sobrou de emoji (blocos pictograficos).
+# NAO inclui a faixa de setas (2190-21FF) nem matematica -- essas sao mapeadas acima.
 _EMOJI_RE = re.compile(
     "["
     "\U0001F300-\U0001FAFF"
-    "\U00002600-\U000027BF"
     "\U0001F000-\U0001F0FF"
+    "\U00002600-\U000026FF"
+    "\U00002700-\U000027BF"
     "\U0000FE00-\U0000FE0F"
-    "\U00002190-\U000021FF"
     "]+",
     flags=re.UNICODE,
 )
@@ -59,7 +90,34 @@ _EMOJI_RE = re.compile(
 def clean_emoji(text: str) -> str:
     for emo, rep in EMOJI_REPLACEMENTS.items():
         text = text.replace(emo, rep)
-    return _EMOJI_RE.sub("", text)
+    text = _EMOJI_RE.sub("", text)
+    _avisar_chars_sem_cobertura(text)
+    return text
+
+
+# Caracteres fora do cp1252 que a experiencia mostra que o reportlab consegue
+# renderizar mesmo assim (ele substitui de fontes simbolicas).
+_TOLERADOS = set("≈√∂≤≥≠×÷∞Σαβγδθλμπσφω")
+
+
+def _avisar_chars_sem_cobertura(text: str):
+    """Avisa se sobrou caractere que pode virar quadrado preto no PDF.
+
+    E' uma rede de seguranca para capitulos futuros: melhor um aviso no console do
+    que descobrir um quadrado preto olhando o PDF depois de publicado.
+    """
+    ruins = {}
+    for ch in text:
+        if ord(ch) < 128 or ch in _TOLERADOS:
+            continue
+        try:
+            ch.encode("cp1252")
+        except UnicodeEncodeError:
+            ruins[ch] = ruins.get(ch, 0) + 1
+    if ruins:
+        detalhe = ", ".join(f"U+{ord(c):04X} ({n}x)" for c, n in sorted(ruins.items()))
+        print(f"  AVISO: caracteres sem cobertura na fonte: {detalhe}")
+        print("         adicione um mapeamento em EMOJI_REPLACEMENTS (build_pdf.py)")
 
 
 # --------------------------------------------------------------------------
@@ -125,9 +183,35 @@ MD_EXTENSIONS = ["fenced_code", "codehilite", "tables", "toc", "sane_lists", "at
 MD_CONFIGS = {"codehilite": {"guess_lang": False, "noclasses": False}}
 
 
+def _fix_pre_blocks(html: str) -> str:
+    """Preserva a formatacao dentro de <pre>.
+
+    O xhtml2pdf ignora `white-space: pre-wrap` e colapsa os espacos em branco como
+    HTML comum -- o que destroi o codigo (tudo vira uma linha corrida). A correcao
+    e' explicita: cada quebra de linha vira <br/> e a indentacao vira &nbsp;.
+    """
+
+    def convert(inner: str) -> str:
+        inner = inner.strip("\n")
+        out = []
+        for line in inner.split("\n"):
+            stripped = line.lstrip(" ")
+            indent = len(line) - len(stripped)
+            out.append("&nbsp;" * indent + stripped)
+        return "<br/>".join(out)
+
+    return re.sub(
+        r"(<pre[^>]*>)(.*?)(</pre>)",
+        lambda m: m.group(1) + convert(m.group(2)) + m.group(3),
+        html,
+        flags=re.S,
+    )
+
+
 def md_to_html(md_text: str) -> str:
     md_text = clean_emoji(md_text)
-    return markdown.markdown(md_text, extensions=MD_EXTENSIONS, extension_configs=MD_CONFIGS)
+    html = markdown.markdown(md_text, extensions=MD_EXTENSIONS, extension_configs=MD_CONFIGS)
+    return _fix_pre_blocks(html)
 
 
 def cover_html(title: str, subtitle: str) -> str:

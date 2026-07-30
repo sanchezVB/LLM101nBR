@@ -60,6 +60,7 @@ llm101n-curso/
     │   └── solucoes/
     ├── 02-micrograd/
     ├── 03-ngram-model/            ← MLP em PyTorch (embeddings, GELU, splits)
+    ├── 04-attention/              ← self-attention, máscara causal, posicional
     └── ...
 ```
 
@@ -125,7 +126,8 @@ Trabalhados ao longo dos capítulos, conforme aparecem:
 | 01 — Bigram Language Model | ✅ Completo (apostila + código + exercícios + PDF) |
 | 02 — Micrograd | ✅ Completo (apostila + código + exercícios + PDF) |
 | 03 — N-gram model (MLP) | ✅ Completo (apostila + código + exercícios + PDF) |
-| 04–17 | ⏳ Planejados (syllabus aprovado) |
+| 04 — Attention | ✅ Completo (apostila + código + exercícios + PDF) |
+| 05–17 | ⏳ Planejados (syllabus aprovado) |
 
 > Este repositório é construído **em fases**. O Capítulo 1 é a "fatia vertical" de
 > referência: define o padrão de qualidade (profundidade do texto, estilo do código,

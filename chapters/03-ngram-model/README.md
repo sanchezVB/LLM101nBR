@@ -33,7 +33,7 @@ quadrigrama, e assim por diante.
 
 Lembra que no Cap. 1 a contagem virou uma matriz 27×27? Para um trigrama, ela vira
 27×27×27. Para `k` caracteres de contexto, são `27^(k+1)` células. Com `k = 10`, isso
-passa de **10²⁰ células** — impossível de armazenar, e a maioria ficaria zerada
+passa de **10^20 células** — impossível de armazenar, e a maioria ficaria zerada
 (nenhum nome tem aquela combinação específica). É a **maldição da dimensionalidade**:
 mais contexto, com contagem, significa uma explosão de células vazias.
 
