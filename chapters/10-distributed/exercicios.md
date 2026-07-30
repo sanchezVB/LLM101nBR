@@ -23,7 +23,8 @@ Sem rodar:
 
 ### E2 — Escalando o número de processos
 Rode `python allreduce.py N` com N = 2, 4 e 8.
-1. O tempo do all-reduce de 10 milhões de elementos cresce com N? Quanto?
+1. O tempo do all-reduce cresce com N? Meça com **três tamanhos** de tensor — 10 mil, 1
+   milhão e 10 milhões de elementos — antes de responder. A resposta é a mesma nos três?
 2. Compare com o que aconteceria no esquema ingênuo (todos → rank 0 → todos): esse tempo
    cresceria **como** em função de N?
 3. Sua máquina tem quantos núcleos? A partir de qual N os processos passam a competir por
@@ -34,11 +35,16 @@ Rode `python allreduce.py N` com N = 2, 4 e 8.
 ### E3 — Provoque um deadlock (importante)
 No `ring_allreduce_manual`, remova a alternância par/ímpar — faça **todos** os processos
 chamarem `dist.send` antes de `dist.recv`.
-1. O programa trava? Sempre, ou só com tensores grandes?
-2. Explique: por que com tensores **pequenos** pode funcionar por acidente? (Dica: buffers
-   do sistema operacional.)
-3. Esse é um bug que passa em teste pequeno e quebra em produção. Que lição isso dá sobre
-   testar código distribuído?
+1. **Preveja antes de rodar.** A explicação clássica do deadlock em `send`/`recv` é o
+   **buffer de socket**: o sistema operacional aceita mensagens pequenas e devolve o
+   controle na hora, então só as grandes travariam. Sob essa teoria, o que deveria
+   acontecer com um tensor de 100 elementos? E com um de 5 milhões?
+2. Agora **meça**, com os dois tamanhos — e também com um tensor de **um único elemento**.
+   O resultado bate com a sua previsão? (Rode cada caso com timeout; o objetivo aqui é
+   justamente travar o programa.)
+3. Se a previsão falhou, o que isso diz sobre aplicar um modelo mental correto *em geral* a
+   uma implementação específica? E sobre um backend que falha **sempre** em vez de falhar
+   só às vezes — isso é um defeito ou um recurso?
 
 ---
 
