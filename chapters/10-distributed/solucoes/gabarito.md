@@ -26,7 +26,7 @@ soma — é todo mundo.
 
 **2. As quatro operações.**
 
-| | Quem fica com o resultado |
+| Operação | Quem fica com o resultado |
 |---|---|
 | `reduce` | **um** rank (o destino) |
 | `all_reduce` | **todos** |
@@ -75,7 +75,7 @@ Sim, *cai*. Com mais processos, o all-reduce do tensor grande fica **mais rápid
 A explicação é a mesma dicotomia do [Capítulo 8](../../08-device/solucoes/gabarito.md),
 **latência vs vazão**:
 
-| | O que domina | Efeito de mais processos |
+| Tamanho do tensor | O que domina | Efeito de mais processos |
 |---|---|---|
 | Tensor pequeno | **latência** dos N−1 saltos do anel | mais saltos → **pior** |
 | Tensor grande | **vazão**: transferir e somar 40 MB | trabalho dividido → **melhor** |
@@ -231,7 +231,7 @@ não dependem do otimizador.)
 gradientes passam de 4 para 2 bytes por parâmetro, mas o estado do AdamW costuma ficar em
 fp32 por precisão. Com 8 processos:
 
-| | Pesos | Gradientes | Estado | Total/GPU |
+| Estratégia | Pesos | Gradientes | Estado | Total/GPU |
 |---|---|---|---|---|
 | DDP | 2 GB | 2 GB | 8 GB | 12 GB |
 | ZeRO-1 | 2 GB | 2 GB | 1 GB | **5 GB** |

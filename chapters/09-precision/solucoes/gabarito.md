@@ -133,7 +133,7 @@ melhor subir raramente e ficar estável do que perseguir o ótimo e viver descar
 
 Medido na máquina desta apostila (AMD Radeon RX 7600 via DirectML), matmul 1024×1024:
 
-| | fp32 | fp16 | Ganho |
+| Dispositivo | fp32 | fp16 | Ganho |
 |---|------|------|-------|
 | CPU | 5,35 ms | 1.951 ms | ~0,003x |
 | Radeon | 0,40 ms | 0,41 ms | **0,98x** |

@@ -69,11 +69,11 @@ posições (Capítulo 11). Ali a posição `t` veria literalmente o token `t+1` 
 
 ## E3 — Sem o embedding posicional
 
-| | Treino | Validação |
+| Configuração | Treino | Validação |
 |---|--------|-----------|
 | **com** posicional | 2,1589 | 2,1517 |
 | **sem** posicional | 2,2075 | 2,1959 |
-| | | **+0,0442** |
+| **diferença** | | **+0,0442** |
 
 **1 e 2.** A loss piora. A atenção é **invariante a permutações**: ela calcula afinidades
 entre pares de posições, mas nada no mecanismo diz **qual veio antes**. Sem o embedding
@@ -88,7 +88,7 @@ experimento seria muito mais destrutivo.
 
 ## E4 — Sem a escala `1/√head_size`
 
-| | Treino | Validação | Peso máximo médio de atenção |
+| Configuração | Treino | Validação | Peso máximo médio de atenção |
 |---|--------|-----------|------------------------------|
 | **com** escala | 2,1589 | 2,1517 | **0,406** |
 | **sem** escala | 2,3508 | 2,3428 | **0,985** |

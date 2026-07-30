@@ -72,7 +72,7 @@ contra `0,333333` da diferença finita — erro de `4,66e-11`.
 
 Medido, 20 passos:
 
-| | passo 0 | passo 5 | passo 19 |
+| Configuração | passo 0 | passo 5 | passo 19 |
 |---|---------|---------|----------|
 | **com** `zero_grad` | 3,0929 | 0,0006 | **0,0001** |
 | **sem** `zero_grad` | 3,0929 | 0,7659 | **0,6158** |

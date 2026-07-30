@@ -64,7 +64,7 @@ ir de 3 para 6 blocos **piora** o modelo (2,197 → 2,773); **com** residuais, m
 
 **Penalidade de remover a LayerNorm:**
 
-| | `lr` = 1e-3 | `lr` = 3e-3 |
+| Profundidade | `lr` = 1e-3 | `lr` = 3e-3 |
 |---|---|---|
 | 3 blocos | **−0,0047** | +0,0600 |
 | 8 blocos | **−0,0047** | **divergiu** |

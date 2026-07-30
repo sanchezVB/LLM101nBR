@@ -77,7 +77,7 @@ memória. Os capítulos 9 e 10 atacam exatamente essa diferença.
 
 ## E3 — A armadilha do `.item()`
 
-| | ms/passo |
+| Medição | ms/passo |
 |---|---|
 | sem ler a loss | 1,18 |
 | lendo `.item()` a cada passo | 1,57 (**+33%**) |
