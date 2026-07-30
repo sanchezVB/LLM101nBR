@@ -34,6 +34,14 @@ Cada capítulo é, ao mesmo tempo, **apostila e repositório**:
   a intuição e a matemática na medida certa.
 - arquivos `.py` → o **código do zero**, executável e comentado em inglês.
 - `exercicios.md` → exercícios para fixar, com pasta `solucoes/`.
+- `solucoes/gabarito.md` → as respostas **comentadas e medidas**. Não são respostas
+  escritas de cabeça: cada uma vem de um `gabarito.py` que foi executado. Rodar os
+  próprios exercícios refutou várias afirmações que já estavam na apostila, e as
+  correções ficaram no texto **junto com a previsão errada** — porque saber por que
+  uma intuição razoável falha vale mais que a resposta certa sozinha. Exemplos:
+  [Cap. 5 E3](chapters/05-transformer/solucoes/gabarito.md),
+  [Cap. 8 E2](chapters/08-device/solucoes/gabarito.md),
+  [Cap. 10 E2 e E3](chapters/10-distributed/solucoes/gabarito.md).
 - `Capitulo-XX.pdf` → o capítulo inteiro (texto + exercícios) **em PDF**, para ler
   no tablet, imprimir ou estudar offline. É gerado a partir do Markdown — veja
   [como gerar os PDFs](#gerando-a-apostila-em-pdf).
@@ -84,7 +92,13 @@ pip install -r tools/requirements-docs.txt
 
 python tools/build_pdf.py --chapter 01    # gera chapters/01-.../Capitulo-01.pdf
 python tools/build_pdf.py --all           # gera dist/ com a apostila completa
+python tools/build_pdf.py --gabaritos     # gera docs/LLM101n-BR-Gabaritos.pdf
 ```
+
+> **Por que os gabaritos são um PDF separado?** Porque uma resposta que está na página
+> seguinte à do exercício não é uma resposta — é uma dica. Abrir outro arquivo é uma
+> decisão consciente. O [`docs/LLM101n-BR-Gabaritos.pdf`](docs/LLM101n-BR-Gabaritos.pdf)
+> reúne todos os gabaritos comentados, com os **números medidos** de cada experimento.
 
 ---
 
