@@ -276,16 +276,27 @@ def nice_title(ch_dir: Path) -> str:
     return raw.replace("-", " ").title()
 
 
+def _markdowns_do_capitulo(ch_dir: Path):
+    """Ordem de montagem do PDF: apostila, anexos (SETUP-*), exercicios.
+
+    Qualquer .md extra no capitulo entra como anexo, para que o PDF seja
+    autossuficiente -- quem le' so' o PDF nao pode ficar sem as instrucoes.
+    """
+    readme = ch_dir / "README.md"
+    exer = ch_dir / "exercicios.md"
+    anexos = sorted(
+        p for p in ch_dir.glob("*.md") if p.name not in {"README.md", "exercicios.md"}
+    )
+    return [p for p in [readme, *anexos, exer] if p.exists()]
+
+
 def build_chapter(num: str):
     ch_dir = find_chapter_dir(num)
     parts = []
-    readme = ch_dir / "README.md"
-    if readme.exists():
-        parts.append(md_to_html(readme.read_text(encoding="utf-8")))
-    exer = ch_dir / "exercicios.md"
-    if exer.exists():
-        parts.append('<div style="page-break-before: always;"></div>')
-        parts.append(md_to_html(exer.read_text(encoding="utf-8")))
+    for i, md in enumerate(_markdowns_do_capitulo(ch_dir)):
+        if i:
+            parts.append('<div style="page-break-before: always;"></div>')
+        parts.append(md_to_html(md.read_text(encoding="utf-8")))
     title = f"Capitulo {num}"
     cover = cover_html(f"Capitulo {num}", nice_title(ch_dir))
     render_pdf(cover + "".join(parts), ch_dir / f"Capitulo-{num}.pdf", title)

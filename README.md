@@ -64,6 +64,7 @@ llm101n-curso/
     ├── 05-transformer/            ← multi-head, residuais, LayerNorm, GPT-2
     ├── 06-tokenization/           ← Unicode/UTF-8 e BPE do zero
     ├── 07-optimization/           ← init, AdamW do zero, warmup+cosine, clipping
+    ├── 08-device/                 ← CPU vs GPU, benchmark, código portátil
     └── ...
 ```
 
@@ -132,7 +133,9 @@ Trabalhados ao longo dos capítulos, conforme aparecem:
 | 04 — Attention | ✅ Completo (apostila + código + exercícios + PDF) |
 | 05 — Transformer | ✅ Completo (apostila + código + exercícios + PDF) |
 | 06 — Tokenization | ✅ Completo (apostila + código + exercícios + PDF) |
-| 07–17 | ⏳ Planejados (syllabus aprovado) |
+| 07 — Optimization | ✅ Completo (apostila + código + exercícios + PDF) |
+| 08 — Device (CPU/GPU) | ✅ Completo (apostila + código + exercícios + PDF) |
+| 09–17 | ⏳ Planejados (syllabus aprovado) |
 
 > Este repositório é construído **em fases**. O Capítulo 1 é a "fatia vertical" de
 > referência: define o padrão de qualidade (profundidade do texto, estilo do código,

@@ -8,8 +8,8 @@
 ## 1. Resumo executivo
 
 O projeto tem hoje uma **base sólida e publicada**: as **Fases I e II estão completas**
-— o **Transformer**, o **tokenizador** e o **treino afinado** já estão construídos. São
-**7 capítulos** prontos, testados e no GitHub. Cada
+— o **Transformer**, o **tokenizador** e o **treino afinado** já estão construídos — e a
+Fase III começou. São **8 capítulos** prontos, testados e no GitHub. Cada
 capítulo entregue inclui apostila, código executável, exercícios com soluções e PDF — e
 todo número citado no texto foi obtido rodando o código de verdade.
 
@@ -19,13 +19,13 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 
 | Indicador | Valor |
 |-----------|-------|
-| Capítulos concluídos | **7 de 17** (41%) |
-| Estado | Fases I e II completas; próxima é a Fase III (velocidade) |
+| Capítulos concluídos | **8 de 17** (47%) |
+| Estado | Fases I e II completas; Fase III em 1/4 |
 | Melhor modelo | Transformer + agendamento de lr, **1,776** (vs ~2,4 do bigrama) |
-| Repositório | Publicado e versionado (9 commits) |
-| Arquivos versionados | 49 |
-| Linhas de código (didático) | ~2.900 (Python) |
-| PDFs gerados | 7 capítulos + panorama + este relatório |
+| Repositório | Publicado e versionado (10 commits) |
+| Arquivos versionados | 57 |
+| Linhas de código (didático) | ~3.500 (Python) |
+| PDFs gerados | 8 capítulos + panorama + este relatório |
 | Verificação | 100% do código roda; autograd, LayerNorm e AdamW batem com PyTorch |
 
 ---
@@ -48,7 +48,8 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 | `6f09fd3` | 01/06/2026 | Capítulo 04 — Attention + correções no gerador de PDF |
 | `1d7c34a` | 01/06/2026 | Capítulo 05 — Transformer (arquitetura GPT-2) |
 | `5f123b3` | 01/06/2026 | Capítulo 06 — Tokenization (BPE do zero) |
-| (atual) | 01/06/2026 | Capítulo 07 — Optimization (fecha a Fase II) |
+| `61269d0` | 01/06/2026 | Capítulo 07 — Optimization (fecha a Fase II) |
+| (atual) | 01/06/2026 | Capítulo 08 — Device (CPU/GPU), medido na Radeon |
 
 ---
 
@@ -75,8 +76,8 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 
 | # | Capítulo | Estado |
 |---|----------|--------|
-| 08 | Device (CPU/GPU) | A fazer (próximo) |
-| 09 | Precision | A fazer |
+| 08 | Device (CPU/GPU) | **Concluído** |
+| 09 | Precision | A fazer (próximo) |
 | 10 | Distributed | A fazer |
 | 11 | Datasets | A fazer |
 
@@ -102,10 +103,10 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 |------|-----------|---|
 | I — Fundamentos | 3 / 3 | **100%** |
 | II — Transformer | 4 / 4 | **100%** |
-| III — Velocidade e escala | 0 / 4 | 0% |
+| III — Velocidade e escala | 1 / 4 | 25% |
 | IV — Inferência e refinamento | 0 / 4 | 0% |
 | V — Produto e além | 0 / 2 | 0% |
-| **TOTAL** | **7 / 17** | **41%** |
+| **TOTAL** | **8 / 17** | **47%** |
 
 ---
 
@@ -261,6 +262,58 @@ cortava **99% dos passos** — deixando de ser clipping e virando normalização
 gradiente. A correção (medir a norma típica antes de escolher o limite) virou seção do
 capítulo.
 
+### Capítulo 08 — Device (CPU/GPU)
+
+Conteúdo (14 páginas no PDF, incluindo o anexo de instalação). Abre a Fase III:
+
+- **Apostila** (`README.md`) — latência vs vazão, o ponto de virada, custo de
+  transferência, efeito do batch, código portátil e **como medir GPU sem se enganar**.
+- **`SETUP-GPU.md`** — instalação nos três caminhos: NVIDIA (CUDA), AMD/Intel no Windows
+  (DirectML) e sem GPU. Incluído no PDF para ele ser autossuficiente.
+- **`device.py`** — detecção portátil de dispositivo (nunca `.cuda()` cravado).
+- **`benchmark.py`** — matmul, transferência e batch, CPU vs GPU.
+- **`train_device.py`** — treino nos dois dispositivos, em três tamanhos de modelo.
+- **`exercicios.md`** — 7 exercícios; solução E6 incluída.
+
+**Medido de verdade** numa **AMD Radeon RX 7600** via DirectML (a máquina não tem NVIDIA,
+então não há CUDA; o Python 3.12 já instalado permitiu usar o `torch-directml`):
+
+| Matmul | Speedup | GFLOP/s CPU | GFLOP/s GPU |
+|--------|---------|-------------|-------------|
+| 128×128 | **0,75x** | 223 | 167 |
+| 1024×1024 | 15,26x | 343 | 5.240 |
+| 4096×4096 | 15,72x | 349 | 5.493 |
+
+A CPU **satura** em ~340 GFLOP/s; a GPU escala de 167 até ~5.500. E em matrizes pequenas
+a GPU **perde**.
+
+**O resultado mais útil do capítulo** — treinando o nosso Transformer:
+
+| Modelo | Parâmetros | Speedup GPU |
+|--------|-----------|-------------|
+| pequeno (o do curso) | 153 mil | **0,30x** (3,3x mais lento!) |
+| médio | 3,2 milhões | 2,65x |
+| grande | 18,9 milhões | 6,82x |
+
+**O modelo deste curso é mais lento na GPU.** As matmuls dele (64×64) estão na faixa onde
+a GPU perde. A recomendação honesta é continuar na CPU — e agora sabemos medir a partir de
+quando vale trocar.
+
+**Dois achados adicionais:**
+
+1. **Lacuna silenciosa de backend.** O AdamW usa `aten::lerp`, que o DirectML não
+   implementa e executa na CPU a cada passo. Trocar para SGD (sem essa lacuna) **dobra** o
+   ganho da GPU: 2,65x → 5,94x. A operação custava ~42 ms/passo, mais da metade do tempo.
+   Não aparece como erro — só como lentidão.
+2. **Não há reprodutibilidade bit-exata entre dispositivos.** A diferença de loss CPU↔GPU
+   é 4,8e-07 no modelo pequeno mas **8,5e-03** no grande: o treino é caótico e amplifica
+   o arredondamento ao longo dos passos. Compare estatísticas, não valores exatos.
+
+**Erro meu, documentado na apostila:** a primeira medição deu speedups não-monotônicos
+(0,62x em 512 e 18x em 1024) porque eu sincronizava a GPU de forma inadequada — medindo o
+*enfileiramento* em vez da *execução*. A correção (drenar lendo o próprio resultado,
+aquecer antes, usar o mínimo de várias rodadas) virou a Seção 6 do capítulo.
+
 ---
 
 ## 5. Infraestrutura montada
@@ -312,18 +365,30 @@ dos PDFs, afetavam todos os capítulos):
 
 ## 7. Próximo passo
 
-**Capítulo 08 — Device (CPU/GPU).** Começa a Fase III, sobre **velocidade**. Sair da CPU
-e levar o treino para a GPU, entendendo por que a diferença é de ordens de grandeza e o
-que exatamente muda no código. Ver a ressalva de hardware abaixo.
+**Capítulo 09 — Precision.** Já usamos a GPU; agora usá-la melhor: treinar com **menos
+bits por número** (fp16, bf16), o que aumenta a vazão e reduz o uso de memória. Entender
+por que funciona sem estragar o treino — e quando estraga.
 
-### Sobre os capítulos 8–10 (velocidade e escala)
+### Sobre a Fase III (velocidade e escala) — situação de hardware **resolvida**
 
-Um ponto a resolver quando chegarmos lá: a máquina tem uma **AMD Radeon RX 7600**, mas
-o PyTorch instalado é a build de CPU e o caminho CUDA não se aplica a placas AMD. O
-`torch-directml` (que roda em GPU AMD no Windows) **não tem versão para Python 3.14**.
-Alternativa concreta: instalar um **Python 3.12 paralelo** só para esses capítulos.
-O Capítulo 10 (treino distribuído) exige múltiplas GPUs para um teste real, mas a
-*mecânica* do `all-reduce` pode ser verificada com múltiplos processos na CPU.
+A máquina tem uma **AMD Radeon RX 7600** (sem NVIDIA, logo sem CUDA). O `torch-directml`
+não tem distribuição para Python 3.14, mas **o Python 3.12 já estava instalado** em
+`C:\Users\User\AppData\Local\Programs\Python\Python312` — então nada precisou ser
+instalado no sistema. O ambiente de GPU vive isolado em **`C:\dml312`** (torch 2.4.1 +
+torch-directml 0.2.5) e é usado apenas nos capítulos da Fase III.
+
+> Para rodar os scripts de GPU: `C:\dml312\Scripts\python.exe benchmark.py`.
+> Os demais capítulos seguem no ambiente principal (Python 3.14 + torch 2.12 CPU).
+
+Com isso, o **Capítulo 8 foi verificado com medições reais** na placa. Restam duas
+ressalvas conhecidas para os próximos:
+
+- **Capítulo 9 (precisão):** o DirectML tem suporte parcial a `float16` e provavelmente
+  nenhum a `bfloat16` (que depende de hardware/backend). Vou medir o que existe e declarar
+  explicitamente o que não pôde ser testado.
+- **Capítulo 10 (distribuído):** DDP de verdade exige **múltiplas** GPUs, o que esta
+  máquina não tem. A *mecânica* do `all-reduce` é verificável com múltiplos processos na
+  CPU (backend `gloo`), e é assim que o capítulo será construído — com o limite declarado.
 
 ### Sugestão de ritmo
 
