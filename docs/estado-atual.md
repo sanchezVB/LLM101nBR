@@ -1,6 +1,6 @@
 # LLM101n-BR — Panorama do Estado Atual
 
-> Relatório de progresso do projeto em **01/06/2026**.
+> Relatório de progresso do projeto em **30/07/2026**.
 > Curso prático e bilíngue para construir um LLM do zero, inspirado no LLM101n.
 
 ---
@@ -20,13 +20,14 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 | Indicador | Valor |
 |-----------|-------|
 | Capítulos concluídos | **11 de 17** (65%) |
-| Estado | Fases I, II e III completas; Fase IV em 1/4 |
+| Estado | Fases I, II e III completas; Fase IV por começar |
 | Modelo atual | Transformer de 2,2 M params escrevendo **prosa em português** (perplexidade 51,7) |
-| Repositório | Publicado e versionado (13 commits) |
-| Arquivos versionados | 82 |
-| Linhas de código (didático) | ~5.700 (Python) |
-| PDFs gerados | 11 capítulos + panorama + este relatório |
-| Verificação | 100% do código roda; autograd, LayerNorm e AdamW batem com PyTorch |
+| Repositório | Publicado e versionado (21 commits) |
+| Arquivos versionados | 125 |
+| Linhas de código (didático) | ~9.500 (Python) |
+| **Exercícios com gabarito medido** | **78 de 78 (100%)** |
+| PDFs gerados | 11 capítulos + gabaritos (52 pág.) + panorama + este relatório |
+| Verificação | 100% do código roda; todo gabarito vem de execução, não de memória |
 
 ---
 
@@ -104,11 +105,11 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 
 | Fase | Concluídos | % |
 |------|-----------|---|
-| I — Fundamentos | 3 / 3 | **100%** |
-| II — Transformer | 4 / 4 | **100%** |
-| III — Velocidade e escala | 3 / 3 | **100%** |
-| IV — Inferência e refinamento | 1 / 5 | 20% |
-| V — Produto e além | 0 / 2 | 0% |
+| I — Fundamentos (cap. 1–3) | 3 / 3 | **100%** |
+| II — Transformer (cap. 4–7) | 4 / 4 | **100%** |
+| III — Velocidade e escala (cap. 8–11) | 4 / 4 | **100%** |
+| IV — Inferência e refinamento (cap. 12–15) | 0 / 4 | 0% |
+| V — Produto e além (cap. 16–17) | 0 / 2 | 0% |
 | **TOTAL** | **11 / 17** | **65%** |
 
 ---
@@ -432,7 +433,9 @@ A arquitetura é praticamente a do Capítulo 5 — **os dados é que mudaram**.
   escondido.
 
 **Três defeitos silenciosos encontrados e corrigidos:** cache corrompido por tradução de
-quebras de linha no Windows (`
+quebras de linha no Windows (`
+
+
 `, mudava o corpus entre execuções); acentos
 destruídos ao redirecionar a saída (cp1252); e o modelo sendo descartado ao fim de 18
 minutos de treino — agora salva checkpoint, de que o Capítulo 12 vai precisar.
@@ -470,6 +473,34 @@ Práticas aplicadas em todo capítulo entregue:
   quando não é possível, isso é declarado no texto (Cap. 4).
 - **PDFs inspecionados** visualmente (acentuação, formatação, código).
 - **Versionamento limpo** — arquivos temporários ignorados; commits descritivos.
+
+### O que resolver os próprios exercícios revelou
+
+Escrever gabaritos **executáveis** para os 78 exercícios não foi só preencher lacunas: foi
+a auditoria mais dura que o curso sofreu. Rodar o que eu tinha afirmado refutou uma série
+de conclusões que estavam publicadas na apostila. As mais instrutivas:
+
+| Onde | O que eu tinha escrito | O que a medição mostrou |
+|---|---|---|
+| Cap. 4, E2 | remover a máscara causal degrada o modelo | com **1 camada não muda nada** (idêntico a 4 casas) — o modelo só usa a última posição |
+| Cap. 5, E3 | LayerNorm ajuda mais em redes profundas | é **neutro** a `lr` baixa em qualquer profundidade; é a *learning rate* que cria a necessidade |
+| Cap. 7, E2 | algum warmup é necessário | **warmup = 0** foi o melhor; minha métrica media lentidão, não instabilidade |
+| Cap. 10, E3 | tensor pequeno escapa do deadlock (buffer de socket) | **trava sempre**, até com 1 elemento — o `send` do gloo é síncrono |
+| Cap. 10, E2 | o all-reduce fica mais lento com mais processos | só com tensor pequeno; com 10 M de elementos fica **2,7x mais rápido** |
+| Cap. 11, E4 | mais contexto melhora a loss | no orçamento cheio, **piora** — o melhor `block_size` é 32, por overfitting |
+
+O padrão que se repete: uma explicação **verdadeira** que não é a **dominante**. A
+propriedade do anel existe, o buffer de socket existe, prosa realmente tem dependências
+longas — e em nenhum dos três casos era isso que decidia o resultado.
+
+O caso do Capítulo 11 é o mais desconfortável, porque o erro foi **de método**. Eu rodei
+os gabaritos com orçamento reduzido e justifiquei com um argumento: as perguntas daquele
+capítulo são "estruturais", logo insensíveis ao número de passos. Não medi o argumento.
+Quando medi, o ranking tinha invertido por completo entre 400 e 3.000 passos.
+
+> A regra que ficou registrada no curso: *"esta pergunta é estrutural, logo o orçamento não
+> importa"* é uma hipótese, não um argumento. Rode com o triplo dos passos e veja se a
+> ordem se mantém.
 
 **Defeitos encontrados e corrigidos nesta rodada** (achados durante a inspeção visual
 dos PDFs, afetavam todos os capítulos):
