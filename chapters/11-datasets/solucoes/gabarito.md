@@ -16,8 +16,8 @@ Essa distinção importa. Reduzir passos é defensável para perguntas **compara
 trocar a arquitetura não seria, porque mudaria o objeto em estudo.
 
 Mas "defensável" não é "seguro". A aposta implícita é que a **ordem** entre as
-configurações não depende do orçamento, mesmo que os valores absolutos dependam — e essa
-aposta **já perdeu duas vezes neste curso**:
+configurações não depende do orçamento, mesmo que os valores absolutos dependam. Essa
+aposta **já tinha perdido duas vezes** neste curso:
 
 | Onde | Com orçamento curto | Com orçamento cheio |
 |---|---|---|
@@ -25,13 +25,31 @@ aposta **já perdeu duas vezes neste curso**:
 | [Cap. 7, E5](../../07-optimization/solucoes/gabarito.md) | `3e-3` ganha | `1e-3` ganha |
 
 Nos dois casos a pergunta era sobre **dinâmica de otimização** — e o orçamento é
-justamente a variável que a dinâmica consome. As perguntas *deste* capítulo são
-**estruturais** (quanto contexto, quantas posições, quantos dados), e deveriam ser
-estáveis.
+justamente a variável que a dinâmica consome. Já as perguntas *deste* capítulo são
+**estruturais** (quanto contexto, quantas posições, quantos dados). Eu escrevi, aqui
+mesmo, que por isso elas *deveriam* ser estáveis.
 
-"Deveriam" não é medição. Rode [`_checagem_orcamento.py`](_checagem_orcamento.py), que
-repete o E4 com o triplo dos passos e compara os **rankings**. É o mesmo teste que você
-deve aplicar a qualquer experimento seu que rode com orçamento reduzido.
+### E aí eu medi, e estava errado
+
+[`checagem_orcamento.py`](checagem_orcamento.py) repete o E4 com o triplo dos passos e
+compara os **rankings**:
+
+| Orçamento | Ranking (melhor → pior) |
+|---|---|
+| 400 passos | **256** < 128 < 32 |
+| 1.200 passos | **128** < 256 < 32 |
+
+**O ranking virou.** Com 400 passos, `block_size=256` parecia o melhor; com 1.200 ele
+perde para 128 (4,1270 contra 4,1649). O E4 não era estrutural o bastante para escapar.
+
+Por isso o número do E4 abaixo vem de [`e4_orcamento_cheio.py`](e4_orcamento_cheio.py),
+rodado com os **3.000 passos** da apostila — cerca de uma hora de treino. Vale a hora: a
+alternativa era publicar uma resposta que a própria checagem do curso já tinha desmentido.
+
+> **A regra que fica.** "Esta pergunta é estrutural, logo o orçamento não importa" é uma
+> hipótese, não um argumento. Rode a sua configuração com o triplo dos passos e veja se a
+> ordem se mantém. Se virar, o orçamento *é* a variável que decide — e o resultado curto
+> não responde nada.
 
 ---
 
@@ -140,28 +158,81 @@ o mesmo texto, e um treino proporcionalmente mais caro para o mesmo conteúdo.
 
 ## E4 — Tamanho do contexto
 
-400 passos, modelo da apostila:
+**Com os 3.000 passos da apostila** ([`e4_orcamento_cheio.py`](e4_orcamento_cheio.py)):
 
-| `block_size` | Treino | Validação | ms/passo |
-|---|---|---|---|
-| 32 | 4,6154 | 4,8286 | 103,2 |
-| 128 | 4,4455 | 4,6957 | 426,4 |
-| 256 | **4,4013** | **4,6464** | 878,3 |
+| `block_size` | Treino | Validação | **Gap** | minutos |
+|---|---|---|---|---|
+| 32 | 3,1947 | **3,8305** | **0,64** | 4,1 |
+| 128 | 2,7816 | 3,9241 | 1,14 | 16,7 |
+| 256 | 2,7419 | 4,0136 | 1,27 | 38,8 |
 
-**1. Mais contexto melhora a loss** — e isso é o **contrário** do que acontecia no
-[Capítulo 4](../../04-attention/solucoes/gabarito.md), onde `block_size=16` era pior que 8.
+**1. Mais contexto PIORA a loss de validação neste corpus.** O melhor `block_size` é 32 —
+o menor dos três.
 
-A diferença é o dado, não o modelo. Nomes têm ~7 letras: não há nada a lembrar de longe, e
-contexto extra só adiciona ruído. Prosa tem dependências longas de verdade.
+Essa é a resposta oposta à que eu tinha escrito, e a história de como ela mudou é a parte
+mais útil do exercício:
+
+| Orçamento | Ranking (melhor → pior) | Vencedor |
+|---|---|---|
+| 400 passos | 256 < 128 < 32 | **256** |
+| 1.200 passos | 128 < 256 < 32 | **128** |
+| **3.000 passos** | **32 < 128 < 256** | **32** |
+
+A ordem se **inverteu completamente** conforme o orçamento cresceu. Com 400 passos eu
+concluí "mais contexto ajuda"; no orçamento de verdade, mais contexto atrapalha.
+
+### Por que — olhe a coluna do gap
+
+O contexto maior tem loss de **treino menor** (2,74 contra 3,19) e loss de **validação
+maior**. Isso é overfitting, e o gap cresce monotonicamente com o contexto: 0,64 → 1,14 →
+1,27.
+
+A causa é um detalhe do desenho do experimento que vale internalizar. Com o **número de
+passos fixo**, `block_size` maior significa **mais épocas sobre o mesmo corpus**:
+
+| `block_size` | Tokens vistos em 3.000 passos | Épocas sobre 621 mil tokens |
+|---|---|---|
+| 32 | 3,1 M | ~5 |
+| 128 | 12,3 M | ~20 |
+| 256 | 24,6 M | ~40 |
+
+Quarenta passagens por um corpus de 621 mil tokens, com um modelo de 2,2 M parâmetros, é
+receita de memorização. O que a tabela mede não é só "quanto contexto ajuda" — é "quanto
+contexto ajuda **a esta razão entre dados e capacidade**".
+
+Com 400 passos ninguém tinha épocas suficientes para memorizar, e aí o contexto maior só
+mostrava a sua vantagem. O overfitting só aparece quando você treina o bastante para ele
+aparecer.
+
+### E a comparação com o Capítulo 4 fica mais interessante
+
+No [Capítulo 4](../../04-attention/solucoes/gabarito.md), `block_size=16` era pior que 8 —
+e eu atribuí isso a nomes serem curtos. Aqui, com prosa, o contexto maior **também**
+perde. A explicação "nomes são curtos" era verdadeira mas insuficiente: o fator comum aos
+dois casos é **corpus pequeno demais para a capacidade do modelo**.
+
+> **Contexto longo não é um bem em si.** Ele é uma aposta: você gasta capacidade e épocas
+> para poder olhar mais longe. A aposta paga quando há dados suficientes para sustentá-la.
+> Os modelos de contexto enorme que você vê por aí são treinados em trilhões de tokens —
+> não em 1,6 MB de Machado.
+
+> ⚠️ **Uma consequência para a apostila.** O capítulo treina com `block_size=128`, que por
+> esta medida não é o ótimo para a loss de validação. A escolha continua defensável por
+> outro motivo: um modelo com contexto 32 **não consegue** condicionar em mais de 32
+> tokens na hora de gerar, por melhor que seja a sua loss média. Loss de validação mede
+> previsão do próximo token, não coerência de texto longo. Mas é uma escolha que agora
+> está medida, não presumida.
 
 **2. Dobrar o contexto quadruplica o tempo? Não — e a resposta surpreende.**
 
-| Mudança | Contexto | Tempo | Se fosse linear | Se fosse quadrático |
+| Mudança | Contexto | Tempo (3.000 passos) | Se fosse linear | Se fosse quadrático |
 |---|---|---|---|---|
-| 32 → 128 | 4x | **4,13x** | 4x | 16x |
-| 128 → 256 | 2x | **2,06x** | 2x | 4x |
+| 32 → 128 | 4x | **4,07x** | 4x | 16x |
+| 128 → 256 | 2x | **2,32x** | 2x | 4x |
 
-O crescimento é **linear**, apesar de a atenção ser O(T²).
+O crescimento é **quase linear**, apesar de a atenção ser O(T²). (A medição com 400
+passos deu 4,13x e 2,06x — as duas concordam, e é o esperado: tempo *por passo* não
+depende de quantos passos você dá.)
 
 O motivo: a atenção é **só uma parte** do custo. As camadas lineares — `qkv`, projeção, e
 o feedforward que tem 4x a largura do modelo — crescem **linearmente** com T, e neste
@@ -171,10 +242,28 @@ maiores.
 É por isso que "atenção é quadrática" é verdade e é enganoso ao mesmo tempo: verdade sobre
 a fórmula, enganoso sobre onde o seu tempo está indo. Meça.
 
-**3. Por que o contexto ajuda mais para prosa.**
-Porque a dependência linguística é longa: concordância, referência a personagens, estrutura
-de período, o assunto do parágrafo. Tudo isso liga tokens distantes. Um nome de 7 letras
-não tem nada disso.
+**3. "Para prosa, o contexto maior ajuda mais do que ajudava para nomes. Por quê?"**
+
+**A premissa da pergunta está errada, e o enunciado a colocou lá porque eu acreditava
+nela.** Medido, o contexto maior não ajuda aqui — atrapalha.
+
+O raciocínio que sustentava a premissa continua **correto e é insuficiente**: prosa
+realmente tem dependências longas (concordância, referência a personagens, estrutura de
+período), e nomes de 7 letras não têm nada disso. Existe, sim, informação útil a 200
+tokens de distância em Machado.
+
+O que falta ao raciocínio é a outra metade da conta. Poder usar contexto longo exige:
+
+1. **informação útil lá atrás** — prosa tem, nomes não têm; e
+2. **dados suficientes para aprender a usá-la sem memorizar o caminho**.
+
+Este corpus atende ao item 1 e falha no item 2. O modelo tem contexto disponível e não
+tem exemplos bastantes para aprender a explorá-lo — então usa a capacidade extra para
+decorar o treino.
+
+> É o tipo de erro que este curso repete de propósito: uma explicação **verdadeira** que
+> não é a **dominante**. A mesma coisa aconteceu no [E2 do Capítulo 10](../../10-distributed/solucoes/gabarito.md),
+> onde a propriedade do anel que eu citei era real mas não era o que mandava no tempo.
 
 ---
 

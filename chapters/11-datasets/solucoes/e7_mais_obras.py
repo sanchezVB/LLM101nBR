@@ -73,7 +73,8 @@ print("  baixando e tokenizando (o BPE em Python puro e' lento; leva alguns minu
 tokens_por_obra = []
 for id_livro, titulo in ORIGINAIS + EXTRAS:
     t0 = time.perf_counter()
-    texto = deduplicar_paragrafos(limpar(baixar(id_livro, titulo), titulo))
+    # deduplicar_paragrafos devolve (texto, n_removidos) -- nao so' o texto
+    texto, _removidos = deduplicar_paragrafos(limpar(baixar(id_livro, titulo), titulo))
     ids = np.array(tok.encode(texto), dtype=np.uint16)
     tokens_por_obra.append((titulo, ids))
     print(f"    {titulo:<26s} {len(texto):>9,} chars -> {len(ids):>8,} tokens "
@@ -82,7 +83,7 @@ for id_livro, titulo in ORIGINAIS + EXTRAS:
 # ---------------------------------------------------------------------------
 # mesmo modelo e mesmo laco de treino do gabarito.py -- vem do modulo comum,
 # nao de uma copia, para que os numeros dos dois scripts sejam comparaveis
-from _modelo import treinar
+from modelo_comum import treinar
 
 print(f"\n  {'obras':>6s} {'tokens':>10s} {'treino':>9s} {'val':>9s} {'gap':>8s}")
 for n_obras in (4, 6, 8, 11):

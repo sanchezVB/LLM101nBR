@@ -39,11 +39,18 @@ O BPE treinado neste corpus aprendeu tokens como `'José Dias '`, `'Capitú, '` 
 
 ---
 
-### E4 — Tamanho do contexto
+### E4 — Tamanho do contexto (o mais instrutivo do capítulo)
 No `train_text.py`, varie o `block_size`: 32, 128 e 256.
-1. Como muda a loss de validação? E o tempo por passo?
-2. O custo da atenção cresce com T². Meça: dobrar o contexto quadruplica o tempo?
-3. Para prosa, o contexto maior ajuda mais do que ajudava para nomes. Por quê?
+
+1. **Preveja primeiro.** Prosa tem dependências longas (concordância, referência a
+   personagens) que nomes de 7 letras não têm. Qual `block_size` deve vencer? Agora meça,
+   com **poucos passos** (400 serve) — bateu com a previsão?
+2. **Meça de novo com o orçamento cheio** (3.000 passos). O ranking é o mesmo? Olhe também
+   a diferença entre a loss de treino e a de validação em cada configuração.
+3. O custo da atenção cresce com T². Dobrar o contexto quadruplica o tempo por passo?
+4. Com o número de **passos** fixo, quantas vezes cada configuração passa pelo corpus
+   inteiro? (Conta: `batch × block × passos ÷ tokens do corpus`.) O que isso explica sobre
+   o que você viu no item 2?
 
 ---
 

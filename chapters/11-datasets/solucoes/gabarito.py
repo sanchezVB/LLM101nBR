@@ -8,12 +8,25 @@ blocos, 2.2 M params) com menos PASSOS -- 400 em vez de 3.000. Reduzir passos e'
 defensavel para perguntas comparativas; trocar a arquitetura nao seria, porque
 mudaria o objeto em estudo.
 
-ATENCAO A UMA LIMITACAO REAL: para exercicios que dependem da DINAMICA DE
-OTIMIZACAO (melhor learning rate, warmup, agendamento), o orcamento reduzido pode
-mudar a RESPOSTA, nao so' a precisao dela -- isso foi medido no E4 do Capitulo 3,
-onde a melhor lr com 4.000 passos e' 1.0 e com 20.000 e' 0.1. Os exercicios deste
-capitulo sao estruturais (contexto, posicoes previstas, dados), e por isso menos
-sensiveis. Onde houver duvida, ela esta' declarada na resposta.
+ATENCAO -- LEIA ANTES DE CONFIAR NOS NUMEROS ABAIXO:
+
+Eu escrevi aqui que os exercicios deste capitulo, por serem ESTRUTURAIS (contexto,
+posicoes previstas, dados), seriam pouco sensiveis ao orcamento. Medi, e estava
+errado. Rodando o E4 com 400, 1.200 e 3.000 passos, o ranking INVERTEU por
+completo:
+
+    400 passos: 256 < 128 < 32   (256 e' o melhor)
+   1200 passos: 128 < 256 < 32
+   3000 passos:  32 < 128 < 256  (32 e' o melhor)
+
+Por isso as respostas definitivas do E4 e do E7 vem dos scripts de orcamento
+cheio (e4_orcamento_cheio.py e e7_orcamento_cheio.py), nao daqui. Este script
+continua util para ver o mecanismo e mexer nos experimentos rapidamente -- mas
+as CONCLUSOES estao no gabarito.md, medidas com 3.000 passos.
+
+A licao geral: 'esta pergunta e' estrutural, logo o orcamento nao importa' e' uma
+hipotese, nao um argumento. Rode com o triplo dos passos e veja se a ordem se
+mantem.
 
 Run (a partir da pasta do capitulo):
     python solucoes/gabarito.py
@@ -40,7 +53,7 @@ from dataset import carregar_tokenizador
 
 # modelo (identico a' apostila) e laco de treino vem do modulo comum, para que
 # este script e o e7_mais_obras.py usem exatamente o mesmo codigo
-from _modelo import PASSOS, treinar, TREINO as treino, VAL as val, VOCAB, V
+from modelo_comum import PASSOS, treinar, TREINO as treino, VAL as val, VOCAB, V
 
 
 # ===========================================================================
@@ -115,17 +128,26 @@ for blk in (32, 128, 256):
 print(f"\n  de 128 para 256, o tempo por passo cresceu "
       f"{tempos[256]/tempos[128]:.2f}x (o contexto dobrou)")
 print("""
-  Respostas:
-  1. Mais contexto melhora a loss -- ao contrario do que acontecia com NOMES no
-     Capitulo 4 (onde 16 era pior que 8). Aqui o texto e' longo de verdade, e
-     ha' informacao util a 256 tokens de distancia.
-  2. O custo NAO quadruplica ao dobrar o contexto, apesar de a atencao ser
-     O(T^2). Motivo: a atencao e' so' UMA parte do custo -- as camadas lineares
-     (qkv, projecao, feedforward) crescem LINEARMENTE com T, e neste modelo elas
-     dominam. O termo quadratico so' passa a mandar em contextos bem maiores.
-  3. Para prosa o contexto ajuda mais que para nomes porque a dependencia
-     linguistica e' longa: concordancia, referencia a personagens, estrutura de
-     frase. Nomes tem ~7 letras -- nao ha' o que lembrar de longe.""")
+  CUIDADO: com 400 passos, contexto maior parece melhor. Com os 3.000 passos da
+  apostila, a ordem se INVERTE e o melhor block_size e' 32. Veja
+  e4_orcamento_cheio.py e a secao E4 do gabarito.md.
+
+  Respostas (do orcamento cheio):
+  1. Mais contexto PIORA a validacao neste corpus. Com 3.000 passos:
+       block 32  -> treino 3.1947 | val 3.8305 | gap 0.64
+       block 128 -> treino 2.7816 | val 3.9241 | gap 1.14
+       block 256 -> treino 2.7419 | val 4.0136 | gap 1.27
+     Treino menor e validacao maior: e' OVERFITTING, e o gap cresce com o
+     contexto. Com passos fixos, block maior = mais EPOCAS sobre o mesmo corpus
+     (~5 para block 32, ~40 para block 256, em 621 mil tokens).
+  2. O custo cresce quase LINEARMENTE (4.07x para 4x de contexto; 2.32x para
+     2x), apesar de a atencao ser O(T^2). Motivo: a atencao e' so' UMA parte do
+     custo -- as camadas lineares (qkv, projecao, feedforward) crescem
+     linearmente com T e dominam neste tamanho.
+  3. A premissa da pergunta ('para prosa o contexto ajuda mais') esta' errada
+     aqui. Prosa TEM dependencia longa, isso e' verdade -- mas usar contexto
+     longo exige tambem DADOS suficientes para aprender a usa-lo sem memorizar.
+     Este corpus tem o primeiro e nao tem o segundo.""")
 
 # ===========================================================================
 print("=" * 74)
