@@ -120,7 +120,7 @@ def treinar(ne=64, nh=4, nl=3, usar_ln=True, dropout=0.0, lr=1e-3, passos=PASSOS
         m.train()
         return tot / n
 
-    desvio = torch.tensor(oscilacao).std().item() if oscilacao else 0.0
+    desvio = torch.tensor(oscilacao).std().item() if len(oscilacao) > 1 else 0.0
     return perda(Xtr, Ytr), perda(Xdev, Ydev), sum(p.nelement() for p in m.parameters()), desvio
 
 
@@ -128,21 +128,55 @@ def treinar(ne=64, nh=4, nl=3, usar_ln=True, dropout=0.0, lr=1e-3, passos=PASSOS
 print("=" * 74)
 print(f"E3 — sem LayerNorm, {PASSOS} passos")
 print("=" * 74)
-print(f"  {'configuracao':>28s} {'treino':>9s} {'val':>9s} {'oscilacao':>10s}")
-for usar_ln in (True, False):
+print(f"  {'blocos':>7s} {'lr':>7s} {'LayerNorm':>10s} {'treino':>9s} {'val':>9s}")
+res_ln = {}
+for nl in (3, 8):
     for lr in (1e-3, 3e-3):
-        tr, va, _, osc = treinar(usar_ln=usar_ln, lr=lr)
-        rot = f"{'COM' if usar_ln else 'SEM'} LayerNorm, lr={lr:g}"
-        va_s = f"{va:9.4f}" if va == va else "  DIVERGIU"
-        print(f"  {rot:>28s} {tr:>9.4f} {va_s} {osc:>10.4f}")
+        for usar_ln in (True, False):
+            tr, va, _, _ = treinar(nl=nl, usar_ln=usar_ln, lr=lr)
+            res_ln[(nl, lr, usar_ln)] = va
+            va_s = f"{va:9.4f}" if va == va else " DIVERGIU"
+            print(f"  {nl:>7d} {lr:>7g} {'ON' if usar_ln else 'OFF':>10s} "
+                  f"{tr:>9.4f} {va_s}")
+    print()
+
+print("  penalidade de REMOVER a LayerNorm (val sem - val com):")
+for nl in (3, 8):
+    for lr in (1e-3, 3e-3):
+        com, sem = res_ln[(nl, lr, True)], res_ln[(nl, lr, False)]
+        d = sem - com if (com == com and sem == sem) else float("nan")
+        marca = "DIVERGIU sem LN" if sem != sem else f"{d:+.4f}"
+        print(f"    {nl} blocos, lr={lr:g}: {marca}")
 print("""
-  Respostas:
-  1 e 2. Sem LayerNorm o treino fica pior e MAIS INSTAVEL -- olhe a coluna
-  'oscilacao' (desvio padrao da loss nos ultimos 200 passos). Com learning rate
-  maior a diferenca aumenta, e sem LayerNorm o treino pode ate' divergir.
-  3. Normalizar mantem as ativacoes numa faixa previsivel a cada bloco, entao o
-     erro de escala nao se acumula com a profundidade -- exatamente o que a
-     Secao 4 da apostila mede com os ganhos de inicializacao.""")
+  Respostas (e a numero 1 nao e' 'LayerNorm sempre ajuda'):
+
+  1 e 2. Leia a tabela de penalidades com atencao, porque ela diz algo mais
+     preciso do que "LayerNorm ajuda":
+
+       lr=1e-3: remover a LayerNorm da' -0.0047 nas DUAS profundidades. Ou seja,
+                com learning rate modesta ela e' dispensavel -- e ate'
+                marginalmente prejudicial -- tanto com 3 quanto com 8 blocos.
+
+       lr=3e-3: com 3 blocos, remover custa +0.0600. Com 8 blocos, o treino
+                DIVERGE completamente.
+
+     Entao nao e' a PROFUNDIDADE que cria a necessidade -- e' a LEARNING RATE.
+     A profundidade AMPLIFICA a falha: o mesmo lr que apenas degrada um modelo
+     de 3 blocos destroi um de 8.
+
+     Faz sentido pela teoria da apostila (Secao 4): a LayerNorm impede que o
+     erro de escala se acumule. Com passos pequenos as ativacoes nao saem de
+     escala, e nao ha' o que corrigir. Com passos grandes elas saem -- e ai' o
+     numero de camadas decide se o estrago e' recuperavel.
+
+  3. Normalizar mantem as ativacoes numa faixa previsivel a cada bloco. E' a
+     mesma medicao do Capitulo 7 (initialization.py), onde a LayerNorm resgata
+     um ganho de inicializacao catastrofico (std 0.003 -> 0.415).
+
+  LICAO: uma peca pode ser correta e necessaria EM GERAL, mas dispensavel na
+  configuracao especifica que voce esta' testando. Isso nao a torna inutil --
+  torna o seu teste insuficiente para julga-la. (Mesma armadilha do E2 do
+  Capitulo 4.)""")
 
 # ===========================================================================
 print("=" * 74)
@@ -174,13 +208,32 @@ for nh in (1, 8, 64):
     tr, va, npar, _ = treinar(nl=3, nh=nh)
     print(f"  {nh:>7d} {64//nh:>10d} {npar:>8d} {va:>9.4f}")
 print("""
-  Respostas:
-  1 e 2. Varias cabecas pequenas costumam ganhar: cada uma pode se especializar
-     numa relacao diferente, e o modelo combina o que todas trouxeram.
-  3. Existe LIMITE: com n_head=64 cada cabeca tem dimensao 1, e um produto
-     escalar de vetores de dimensao 1 quase nao consegue expressar afinidade --
-     a atencao vira quase uma comparacao de dois numeros. Na pratica usa-se
-     head_size entre 32 e 128.""")
+  Respostas (e a 3 nao saiu como eu previa):
+
+  1 e 2. Varias cabecas pequenas ganham: cada uma se especializa numa relacao
+     diferente, e a projecao combina o que todas trouxeram. Note que os TRES
+     casos tem exatamente os mesmos 153.499 parametros -- head_size =
+     n_embd // n_head, entao o total de pesos e' constante. A melhora vem so' da
+     ORGANIZACAO.
+
+  3. Eu esperava um limite: com n_head=64 cada cabeca tem dimensao 1, e um
+     produto escalar de vetores de dimensao 1 e' so' a multiplicacao de dois
+     numeros -- pareceria pobre demais para expressar afinidade.
+
+     A MEDICAO DIZ O CONTRARIO: 64 cabecas foi o melhor dos tres.
+
+     Por que o limite nao aparece aqui? Porque a tarefa e' simples (nomes,
+     contexto 8). Sessenta e quatro padroes de atencao escalares, combinados
+     pela projecao, dao conta. O custo de cada cabeca ser pobre e' compensado
+     pela quantidade.
+
+     Na pratica os modelos usam head_size entre 32 e 128 -- mas por razoes que
+     este experimento NAO exercita: tarefas complexas onde cada cabeca precisa
+     comparar representacoes ricas, e eficiencia de hardware (cabecas muito
+     pequenas geram matmuls pequenas, que a GPU odeia -- ver Capitulo 8).
+
+     Licao: uma regra pratica da literatura pode nao se reproduzir na sua escala.
+     Vale saber a regra E saber por que ela existe.""")
 
 # ===========================================================================
 print("=" * 74)
