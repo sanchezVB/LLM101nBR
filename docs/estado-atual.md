@@ -9,7 +9,7 @@
 
 O projeto tem hoje uma **base sólida e publicada**: as **Fases I e II estão completas**
 — o **Transformer**, o **tokenizador** e o **treino afinado** já estão construídos — e a
-Fase III começou. São **8 capítulos** prontos, testados e no GitHub. Cada
+Fase III está na metade. São **9 capítulos** prontos, testados e no GitHub. Cada
 capítulo entregue inclui apostila, código executável, exercícios com soluções e PDF — e
 todo número citado no texto foi obtido rodando o código de verdade.
 
@@ -19,13 +19,13 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 
 | Indicador | Valor |
 |-----------|-------|
-| Capítulos concluídos | **8 de 17** (47%) |
-| Estado | Fases I e II completas; Fase III em 1/4 |
+| Capítulos concluídos | **9 de 17** (53%) |
+| Estado | Fases I e II completas; Fase III em 2/4 |
 | Melhor modelo | Transformer + agendamento de lr, **1,776** (vs ~2,4 do bigrama) |
-| Repositório | Publicado e versionado (10 commits) |
-| Arquivos versionados | 57 |
-| Linhas de código (didático) | ~3.500 (Python) |
-| PDFs gerados | 8 capítulos + panorama + este relatório |
+| Repositório | Publicado e versionado (11 commits) |
+| Arquivos versionados | 65 |
+| Linhas de código (didático) | ~4.200 (Python) |
+| PDFs gerados | 9 capítulos + panorama + este relatório |
 | Verificação | 100% do código roda; autograd, LayerNorm e AdamW batem com PyTorch |
 
 ---
@@ -49,7 +49,8 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 | `1d7c34a` | 01/06/2026 | Capítulo 05 — Transformer (arquitetura GPT-2) |
 | `5f123b3` | 01/06/2026 | Capítulo 06 — Tokenization (BPE do zero) |
 | `61269d0` | 01/06/2026 | Capítulo 07 — Optimization (fecha a Fase II) |
-| (atual) | 01/06/2026 | Capítulo 08 — Device (CPU/GPU), medido na Radeon |
+| `b1b0318` | 01/06/2026 | Capítulo 08 — Device (CPU/GPU), medido na Radeon |
+| (atual) | 01/06/2026 | Capítulo 09 — Precision (fp16/bf16, loss scaling) |
 
 ---
 
@@ -77,8 +78,8 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 | # | Capítulo | Estado |
 |---|----------|--------|
 | 08 | Device (CPU/GPU) | **Concluído** |
-| 09 | Precision | A fazer (próximo) |
-| 10 | Distributed | A fazer |
+| 09 | Precision | **Concluído** |
+| 10 | Distributed | A fazer (próximo) |
 | 11 | Datasets | A fazer |
 
 ### Fase IV — Inferência e refinamento
@@ -103,10 +104,10 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 |------|-----------|---|
 | I — Fundamentos | 3 / 3 | **100%** |
 | II — Transformer | 4 / 4 | **100%** |
-| III — Velocidade e escala | 1 / 4 | 25% |
+| III — Velocidade e escala | 2 / 4 | 50% |
 | IV — Inferência e refinamento | 0 / 4 | 0% |
 | V — Produto e além | 0 / 2 | 0% |
-| **TOTAL** | **8 / 17** | **47%** |
+| **TOTAL** | **9 / 17** | **53%** |
 
 ---
 
@@ -314,6 +315,46 @@ quando vale trocar.
 *enfileiramento* em vez da *execução*. A correção (drenar lendo o próprio resultado,
 aquecer antes, usar o mínimo de várias rodadas) virou a Seção 6 do capítulo.
 
+### Capítulo 09 — Precision
+
+Conteúdo (12 páginas no PDF):
+
+- **Apostila** (`README.md`) — anatomia de um float, alcance vs precisão, overflow e
+  underflow, por que o bf16 venceu, loss scaling, precisão mista e pesos mestres.
+- **`floats.py`** — os bits de fp32/fp16/bf16, limites de cada formato, sobrevivência de
+  gradientes típicos e consumo de memória.
+- **`precision_bench.py`** — velocidade por precisão (com repetições **adaptativas**, para
+  o caso patológico não fazer o benchmark levar minutos) e a demonstração dos pesos mestres.
+- **`loss_scaling.py`** — o problema medido e um **GradScaler dinâmico do zero**.
+- **`exercicios.md`** — 7 exercícios (E1–E5 rodam sem GPU).
+
+**O achado principal, contra o discurso comum:** neste hardware, precisão reduzida compra
+**memória, não velocidade**.
+
+| Dispositivo | fp32 | fp16 | Ganho |
+|-------------|------|------|-------|
+| CPU | 5,35 ms | 1.951 ms | **~0,003x** (centenas de vezes pior) |
+| Radeon RX 7600 | 0,40 ms | 0,41 ms | **0,98x** (nenhum) |
+
+A CPU não tem unidades de 16 bits para matmul (emula elemento por elemento); o DirectML não
+despacha para os kernels de 16 bits da RDNA3. O ganho de velocidade exige hardware **e**
+backend preparados — na prática, NVIDIA com tensor cores. O de memória é garantido (metade
+dos bytes por parâmetro).
+
+**bf16 nesta placa aborta o processo** — com erro fatal, não exceção capturável:
+`[F] Invalid or unsupported data type BFloat16`. Por isso o script consulta uma lista de
+suporte conhecido **antes** de tentar. Lição prática: em backend imaturo, "não suportado"
+pode significar "seu programa morre".
+
+**O que foi medido e vale em qualquer máquina:**
+
+- **50,3% dos gradientes viram zero em fp16** (mediana 2,93e-08 vs mínimo normal 6,10e-05).
+  Metade do modelo não aprende — e sem erro nenhum.
+- **A janela do loss scaling:** escala 1 perde 50,3%; 1.024 a 65.536 funcionam; 2²² em
+  diante causa overflow. A janela **se move** durante o treino → daí o scaler dinâmico.
+- **Pesos mestres:** somando 1e-4 a um peso 1,0 cem vezes, o fp32 chega a 1,010002 e o
+  fp16/bf16 ficam em **1,000000** — o peso não se moveu nem uma vez.
+
 ---
 
 ## 5. Infraestrutura montada
@@ -365,9 +406,10 @@ dos PDFs, afetavam todos os capítulos):
 
 ## 7. Próximo passo
 
-**Capítulo 09 — Precision.** Já usamos a GPU; agora usá-la melhor: treinar com **menos
-bits por número** (fp16, bf16), o que aumenta a vazão e reduz o uso de memória. Entender
-por que funciona sem estragar o treino — e quando estraga.
+**Capítulo 10 — Distributed.** Fecha a trilogia "Need for Speed": treinar em **vários
+dispositivos** ao mesmo tempo, com o `all-reduce` sincronizando os gradientes. Como a
+máquina tem uma GPU só, a **mecânica** será verificada com múltiplos processos na CPU
+(backend `gloo`) — e o limite declarado, como no Capítulo 9.
 
 ### Sobre a Fase III (velocidade e escala) — situação de hardware **resolvida**
 
