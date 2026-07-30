@@ -8,23 +8,24 @@
 ## 1. Resumo executivo
 
 O projeto tem hoje uma **base sólida e publicada**: a **Fase I (Fundamentos) está
-completa** e o **Transformer já está construído e funcionando**. São **5 capítulos**
-prontos, testados e no GitHub. Cada capítulo entregue inclui apostila, código
-executável, exercícios com soluções e PDF — e todo número citado no texto foi obtido
-rodando o código de verdade.
+completa** e a Fase II está em 3/4 — o **Transformer já está construído e funcionando**,
+e o **tokenizador** também. São **6 capítulos** prontos, testados e no GitHub. Cada
+capítulo entregue inclui apostila, código executável, exercícios com soluções e PDF — e
+todo número citado no texto foi obtido rodando o código de verdade.
 
-**O marco desta rodada:** o curso já entrega um **GPT funcional**. A arquitetura do
-Capítulo 5 é, em estrutura, a mesma do GPT-2 — construída peça por peça, do zero.
+**O marco:** o curso já entrega um **GPT funcional** com **tokenizador próprio**. A
+arquitetura do Capítulo 5 é, em estrutura, a mesma do GPT-2, e o BPE do Capítulo 6 é o
+mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 
 | Indicador | Valor |
 |-----------|-------|
-| Capítulos concluídos | **5 de 17** (29%) |
-| Estado | Fase I completa; Fase II (Transformer) em 2/4 |
+| Capítulos concluídos | **6 de 17** (35%) |
+| Estado | Fase I completa; Fase II (Transformer) em 3/4 |
 | Melhor modelo | Transformer, **1,811** de loss (vs ~2,4 do bigrama) |
-| Repositório | Publicado e versionado (7 commits) |
-| Arquivos versionados | 36 |
-| Linhas de código (didático) | ~1.800 (Python) |
-| PDFs gerados | 5 capítulos + panorama + este relatório |
+| Repositório | Publicado e versionado (8 commits) |
+| Arquivos versionados | 42 |
+| Linhas de código (didático) | ~2.200 (Python) |
+| PDFs gerados | 6 capítulos + panorama + este relatório |
 | Verificação | 100% do código roda; autograd e LayerNorm batem com PyTorch |
 
 ---
@@ -44,7 +45,9 @@ Capítulo 5 é, em estrutura, a mesma do GPT-2 — construída peça por peça, 
 | `5fcb0fe` | 01/06/2026 | Panorama do curso + suporte a `--file` no gerador de PDF |
 | `a18b020` | 01/06/2026 | Panorama do estado atual |
 | `0547d63` | 01/06/2026 | Capítulo 03 — N-gram model (MLP) + dataset do IBGE |
-| (atual) | 01/06/2026 | Capítulo 04 — Attention + correções no gerador de PDF |
+| `6f09fd3` | 01/06/2026 | Capítulo 04 — Attention + correções no gerador de PDF |
+| `1d7c34a` | 01/06/2026 | Capítulo 05 — Transformer (arquitetura GPT-2) |
+| (atual) | 01/06/2026 | Capítulo 06 — Tokenization (BPE do zero) |
 
 ---
 
@@ -64,8 +67,8 @@ Capítulo 5 é, em estrutura, a mesma do GPT-2 — construída peça por peça, 
 |---|----------|--------|
 | 04 | Attention | **Concluído** |
 | 05 | Transformer | **Concluído** |
-| 06 | Tokenization | A fazer (próximo) |
-| 07 | Optimization | A fazer |
+| 06 | Tokenization | **Concluído** |
+| 07 | Optimization | A fazer (próximo) |
 
 ### Fase III — Velocidade e escala
 
@@ -97,11 +100,11 @@ Capítulo 5 é, em estrutura, a mesma do GPT-2 — construída peça por peça, 
 | Fase | Concluídos | % |
 |------|-----------|---|
 | I — Fundamentos | 3 / 3 | **100%** |
-| II — Transformer | 2 / 4 | 50% |
+| II — Transformer | 3 / 4 | 75% |
 | III — Velocidade e escala | 0 / 4 | 0% |
 | IV — Inferência e refinamento | 0 / 4 | 0% |
 | V — Produto e além | 0 / 2 | 0% |
-| **TOTAL** | **5 / 17** | **29%** |
+| **TOTAL** | **6 / 17** | **35%** |
 
 ---
 
@@ -190,6 +193,31 @@ Conteúdo (9 páginas no PDF):
 referência, o GPT-2 small tem 124 milhões de parâmetros, 12 blocos e 12 cabeças — mesmo
 desenho, outra escala.
 
+### Capítulo 06 — Tokenization (BPE)
+
+Conteúdo (10 páginas no PDF). Capítulo em Python puro, sem PyTorch, roda em segundos:
+
+- **Apostila** (`README.md`) — Unicode, UTF-8, por que começar pelos bytes, o algoritmo
+  BPE, a importância da ordem das fusões, e o "imposto do português".
+- **`unicode_utf8.py`** — caractere → code point → bytes, com o custo dos acentos.
+- **`bpe.py`** — o tokenizador completo: `train`, `encode`, `decode`, compressão e
+  verificação de **round-trip** (`decode(encode(x)) == x`).
+- **`exercicios.md`** — 7 exercícios; solução E5 incluída.
+
+**Resultados:** compressão **2,24x** no domínio de treino e **2,17x** em nomes novos (ele
+aprendeu o padrão, não decorou). Round-trip passou em **todos** os casos, incluindo
+acentos, japonês, emoji e string vazia — a garantia dos bytes funcionando.
+
+**O que o algoritmo descobriu sozinho:** entre os tokens mais longos aprendidos estão
+`'ilson'`, `'erson'`, `'ilton'`, `'iana'` — sufixos produtivos de nomes brasileiros.
+Ninguém ensinou morfologia; é contagem de pares virando estrutura linguística.
+
+**Achado com consequência prática:** treinando um segundo tokenizador do **mesmo
+tamanho** em português com acentos (usando as apostilas do curso como corpus), a mesma
+frase passa de **50 para 25 tokens** — **53% de economia**. Como APIs de LLM cobram por
+token e o contexto é medido em tokens, escrever em português num tokenizador treinado em
+inglês custa mais caro pelo mesmo conteúdo. O capítulo mede isso.
+
 ---
 
 ## 5. Infraestrutura montada
@@ -241,11 +269,10 @@ dos PDFs, afetavam todos os capítulos):
 
 ## 7. Próximo passo
 
-**Capítulo 06 — Tokenization.** Com a arquitetura pronta, o gargalo passa a ser a
-entrada: hoje alimentamos o modelo com **um caractere por token**, o que alonga as
-sequências e gasta capacidade do modelo aprendendo a montar palavras a partir de letras.
-O próximo capítulo constrói um tokenizador **BPE** (*byte pair encoding*) do zero — o
-mesmo algoritmo que o GPT usa — e nos leva ao território de Unicode e UTF-8.
+**Capítulo 07 — Optimization.** Já temos arquitetura (Cap. 5) e entrada (Cap. 6). Falta
+treinar **bem**. Até aqui usamos valores "razoáveis" escolhidos na mão: o capítulo abre
+essa caixa — **inicialização** dos pesos, o **AdamW** por dentro, agendamento da
+**learning rate** e *gradient clipping*. Fecha a Fase II.
 
 ### Sobre os capítulos 8–10 (velocidade e escala)
 

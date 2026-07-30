@@ -62,6 +62,7 @@ llm101n-curso/
     ├── 03-ngram-model/            ← MLP em PyTorch (embeddings, GELU, splits)
     ├── 04-attention/              ← self-attention, máscara causal, posicional
     ├── 05-transformer/            ← multi-head, residuais, LayerNorm, GPT-2
+    ├── 06-tokenization/           ← Unicode/UTF-8 e BPE do zero
     └── ...
 ```
 
@@ -129,7 +130,8 @@ Trabalhados ao longo dos capítulos, conforme aparecem:
 | 03 — N-gram model (MLP) | ✅ Completo (apostila + código + exercícios + PDF) |
 | 04 — Attention | ✅ Completo (apostila + código + exercícios + PDF) |
 | 05 — Transformer | ✅ Completo (apostila + código + exercícios + PDF) |
-| 06–17 | ⏳ Planejados (syllabus aprovado) |
+| 06 — Tokenization | ✅ Completo (apostila + código + exercícios + PDF) |
+| 07–17 | ⏳ Planejados (syllabus aprovado) |
 
 > Este repositório é construído **em fases**. O Capítulo 1 é a "fatia vertical" de
 > referência: define o padrão de qualidade (profundidade do texto, estilo do código,
