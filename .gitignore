@@ -23,3 +23,9 @@ _*.png
 # Apostila completa gerada (capitulos individuais SAO versionados;
 # a compilacao completa e' artefato e pode ser regerada com --all)
 /dist/
+
+# Cap. 11: livros baixados (regeraveis com prepare_data.py) e checkpoints.
+# Os .bin tokenizados SAO versionados: sao pequenos e deixam o capitulo
+# rodavel sem esperar download + tokenizacao.
+_brutos/
+*.pt

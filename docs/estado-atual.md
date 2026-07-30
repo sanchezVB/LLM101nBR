@@ -9,7 +9,7 @@
 
 O projeto tem hoje uma **base sólida e publicada**: as **Fases I e II estão completas**
 — o **Transformer**, o **tokenizador** e o **treino afinado** já estão construídos — e a
-**Fase III está completa**. São **10 capítulos** prontos, testados e no GitHub. Cada
+**Fase III está completa** e a Fase IV começou. São **11 capítulos** prontos, testados e no GitHub. Cada
 capítulo entregue inclui apostila, código executável, exercícios com soluções e PDF — e
 todo número citado no texto foi obtido rodando o código de verdade.
 
@@ -19,13 +19,13 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 
 | Indicador | Valor |
 |-----------|-------|
-| Capítulos concluídos | **10 de 17** (59%) |
-| Estado | Fases I, II e III completas; próxima é a Fase IV |
-| Melhor modelo | Transformer + agendamento de lr, **1,776** (vs ~2,4 do bigrama) |
-| Repositório | Publicado e versionado (12 commits) |
-| Arquivos versionados | 73 |
-| Linhas de código (didático) | ~5.000 (Python) |
-| PDFs gerados | 10 capítulos + panorama + este relatório |
+| Capítulos concluídos | **11 de 17** (65%) |
+| Estado | Fases I, II e III completas; Fase IV em 1/4 |
+| Modelo atual | Transformer de 2,2 M params escrevendo **prosa em português** (perplexidade 51,7) |
+| Repositório | Publicado e versionado (13 commits) |
+| Arquivos versionados | 82 |
+| Linhas de código (didático) | ~5.700 (Python) |
+| PDFs gerados | 11 capítulos + panorama + este relatório |
 | Verificação | 100% do código roda; autograd, LayerNorm e AdamW batem com PyTorch |
 
 ---
@@ -51,7 +51,8 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 | `61269d0` | 01/06/2026 | Capítulo 07 — Optimization (fecha a Fase II) |
 | `b1b0318` | 01/06/2026 | Capítulo 08 — Device (CPU/GPU), medido na Radeon |
 | `6f106c1` | 01/06/2026 | Capítulo 09 — Precision (fp16/bf16, loss scaling) |
-| (atual) | 01/06/2026 | Capítulo 10 — Distributed (fecha a Fase III) |
+| `5d0c47f` | 01/06/2026 | Capítulo 10 — Distributed (fecha a Fase III) |
+| (atual) | 01/06/2026 | Capítulo 11 — Datasets (a virada para prosa) |
 
 ---
 
@@ -81,13 +82,13 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 | 08 | Device (CPU/GPU) | **Concluído** |
 | 09 | Precision | **Concluído** |
 | 10 | Distributed | **Concluído** |
-| 11 | Datasets | A fazer (próximo) |
+| 11 | Datasets | **Concluído** |
 
 ### Fase IV — Inferência e refinamento
 
 | # | Capítulo | Estado |
 |---|----------|--------|
-| 12 | Inference I: KV-cache | A fazer |
+| 12 | Inference I: KV-cache | A fazer (próximo) |
 | 13 | Inference II: Quantization | A fazer |
 | 14 | Finetuning I: SFT | A fazer |
 | 15 | Finetuning II: RL | A fazer |
@@ -105,10 +106,10 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 |------|-----------|---|
 | I — Fundamentos | 3 / 3 | **100%** |
 | II — Transformer | 4 / 4 | **100%** |
-| III — Velocidade e escala | 3 / 4 | 75% |
-| IV — Inferência e refinamento | 0 / 4 | 0% |
+| III — Velocidade e escala | 3 / 3 | **100%** |
+| IV — Inferência e refinamento | 1 / 5 | 20% |
 | V — Produto e além | 0 / 2 | 0% |
-| **TOTAL** | **10 / 17** | **59%** |
+| **TOTAL** | **11 / 17** | **65%** |
 
 ---
 
@@ -392,6 +393,50 @@ distribuído, o modo de falha normal não é o erro, é o **travamento silencios
 **Não verificável aqui** (declarado no capítulo): speedup real com N GPUs, backend NCCL, e
 os estágios 2 e 3 do ZeRO (a tabela deles é aritmética, não medição).
 
+### Capítulo 11 — Datasets (a virada do curso)
+
+Conteúdo (11 páginas no PDF). **O modelo deixou de gerar nomes e passou a gerar prosa.**
+
+- **Apostila** (`README.md`) — o pipeline completo e as armadilhas de cada etapa.
+- **`prepare_data.py`** — baixa 5 obras de **Machado de Assis** (Project Gutenberg,
+  domínio público), limpa, divide **por obra**, tokeniza com o BPE do Cap. 6 e grava
+  `uint16`.
+- **`dataset.py`** — `np.memmap` e formação de batches (~5 M tokens/s).
+- **`train_text.py`** — Transformer de 2,2 M params, contexto 128, ~18 min na CPU.
+- **`exercicios.md`** — 7 exercícios; solução E2 (medição de vazamento) incluída.
+
+**Resultado:** loss de validação **3,945**, perplexidade **51,7** (contra 1024 de um chute
+uniforme). O modelo escreve português com pontuação correta, estrutura de diálogo e até a
+**ortografia de 1880** do corpus (`belleza`, `collegio`, `philosophias`).
+
+| Capítulo | O que o modelo gera |
+|----------|--------------------|
+| 01 (bigrama) | `cexzma`, `zktahwelo` |
+| 05 (Transformer) | `jandir`, `valdinia` |
+| **11 (prosa)** | **frases em português, com pontuação e diálogo** |
+
+A arquitetura é praticamente a do Capítulo 5 — **os dados é que mudaram**.
+
+**Lições verificadas:**
+
+- **Divisão por obra, não por linha sorteada.** A solução do E2 mede o vazamento contando
+  n-gramas compartilhados: a divisão errada tem **2,4x mais** sobreposição de 8-gramas. O
+  efeito é consistente, mas *moderado* neste corpus — e o capítulo explica por quê
+  (embaralhamento por bloco, e um autor só) em vez de exagerar.
+- **Dividir antes de tokenizar**, senão o tokenizador aprende o vocabulário da validação.
+- **O BPE aprende o domínio:** descobriu `'José Dias '` e `'Capitú, '` como tokens únicos.
+- **`uint16` + `memmap`:** 4x menos espaço e leitura sem carregar na RAM.
+- **Prever em todas as posições** multiplica o sinal de treino por `block_size` de graça.
+- **Overfitting explicado pela conta:** 2,2 M parâmetros para 621 mil tokens = **0,28 token
+  por parâmetro**, contra os ~20 que a regra do *Chinchilla* sugere. Documentado, não
+  escondido.
+
+**Três defeitos silenciosos encontrados e corrigidos:** cache corrompido por tradução de
+quebras de linha no Windows (`
+`, mudava o corpus entre execuções); acentos
+destruídos ao redirecionar a saída (cp1252); e o modelo sendo descartado ao fim de 18
+minutos de treino — agora salva checkpoint, de que o Capítulo 12 vai precisar.
+
 ---
 
 ## 5. Infraestrutura montada
@@ -443,14 +488,11 @@ dos PDFs, afetavam todos os capítulos):
 
 ## 7. Próximo passo
 
-**Capítulo 11 — Datasets.** Começa a Fase IV, e é a virada mais significativa do curso:
-trocamos os nomes por **texto de verdade**. O modelo deixa de gerar nomes e passa a gerar
-prosa.
-
-> **Aviso importante sobre a métrica:** o benchmark de **1,776** será aposentado ali. Prever
-> o próximo caractere em prosa é uma tarefa muito mais difícil que em nomes, então a loss
-> vai **subir** — e isso não é regressão, é mudança de tarefa. A partir do Capítulo 11 a
-> comparação recomeça.
+**Capítulo 12 — Inference I: KV-cache.** Temos um modelo que escreve prosa e que é **lento**
+para gerar: a cada token novo ele recalcula a atenção sobre todo o contexto anterior. O
+KV-cache guarda as chaves e valores já computados e acelera a geração em várias vezes —
+**sem mudar uma vírgula do que o modelo produz**. O checkpoint salvo pelo Capítulo 11
+(`modelo.pt`) é o ponto de partida.
 
 ### Sobre a Fase III (velocidade e escala) — situação de hardware **resolvida**
 
