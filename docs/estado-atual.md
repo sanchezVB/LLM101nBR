@@ -8,19 +8,24 @@
 ## 1. Resumo executivo
 
 O projeto tem hoje uma **base sólida e publicada**: a **Fase I (Fundamentos) está
-completa** e o Transformer já começou. São **4 capítulos** prontos, testados e no
-GitHub. Cada capítulo entregue inclui apostila, código executável, exercícios com
-soluções e PDF — e todo número citado no texto foi obtido rodando o código de verdade.
+completa** e o **Transformer já está construído e funcionando**. São **5 capítulos**
+prontos, testados e no GitHub. Cada capítulo entregue inclui apostila, código
+executável, exercícios com soluções e PDF — e todo número citado no texto foi obtido
+rodando o código de verdade.
+
+**O marco desta rodada:** o curso já entrega um **GPT funcional**. A arquitetura do
+Capítulo 5 é, em estrutura, a mesma do GPT-2 — construída peça por peça, do zero.
 
 | Indicador | Valor |
 |-----------|-------|
-| Capítulos concluídos | **4 de 17** (24%) |
-| Estado | Fase I completa; Fase II (Transformer) iniciada |
-| Repositório | Publicado e versionado (6 commits) |
-| Arquivos versionados | 30 |
-| Linhas de código (didático) | ~1.340 (Python) |
-| PDFs gerados | 4 capítulos + panorama + este relatório |
-| Verificação | 100% do código roda; gradientes do Cap. 2 batem com PyTorch |
+| Capítulos concluídos | **5 de 17** (29%) |
+| Estado | Fase I completa; Fase II (Transformer) em 2/4 |
+| Melhor modelo | Transformer, **1,811** de loss (vs ~2,4 do bigrama) |
+| Repositório | Publicado e versionado (7 commits) |
+| Arquivos versionados | 36 |
+| Linhas de código (didático) | ~1.800 (Python) |
+| PDFs gerados | 5 capítulos + panorama + este relatório |
+| Verificação | 100% do código roda; autograd e LayerNorm batem com PyTorch |
 
 ---
 
@@ -58,8 +63,8 @@ soluções e PDF — e todo número citado no texto foi obtido rodando o código
 | # | Capítulo | Estado |
 |---|----------|--------|
 | 04 | Attention | **Concluído** |
-| 05 | Transformer | A fazer (próximo) |
-| 06 | Tokenization | A fazer |
+| 05 | Transformer | **Concluído** |
+| 06 | Tokenization | A fazer (próximo) |
 | 07 | Optimization | A fazer |
 
 ### Fase III — Velocidade e escala
@@ -92,11 +97,11 @@ soluções e PDF — e todo número citado no texto foi obtido rodando o código
 | Fase | Concluídos | % |
 |------|-----------|---|
 | I — Fundamentos | 3 / 3 | **100%** |
-| II — Transformer | 1 / 4 | 25% |
+| II — Transformer | 2 / 4 | 50% |
 | III — Velocidade e escala | 0 / 4 | 0% |
 | IV — Inferência e refinamento | 0 / 4 | 0% |
 | V — Produto e além | 0 / 2 | 0% |
-| **TOTAL** | **4 / 17** | **24%** |
+| **TOTAL** | **5 / 17** | **29%** |
 
 ---
 
@@ -164,6 +169,27 @@ Conteúdo (10 páginas no PDF):
 feedforward, cai para **1,913**. Isso motiva diretamente o Capítulo 5: o Transformer é
 a combinação das duas metades.
 
+### Capítulo 05 — Transformer
+
+Conteúdo (9 páginas no PDF):
+
+- **Apostila** (`README.md`) — multi-head attention, conexões residuais (e por que
+  viabilizam profundidade), LayerNorm, o bloco, pre-norm vs post-norm, e a montagem do
+  modelo completo.
+- **`layernorm.py`** — LayerNorm do zero, **verificada contra `nn.LayerNorm`**
+  (diferença 4,8e-07) e demonstrando a independência do batch (por que não BatchNorm).
+- **`transformer.py`** — o modelo completo: 3 blocos, 4 cabeças, `n_embd=64`,
+  **153.499 parâmetros**. Treina em ~6 min na CPU.
+- **`exercicios.md`** — 7 exercícios; solução E2 (ablação dos residuais) incluída.
+
+**Resultado:** loss de validação **1,811** — o melhor do curso. Progressão completa:
+2,4 (bigrama) → 1,967 (MLP) → 1,913 (atenção+ff) → **1,811 (Transformer)**. Treino
+(1,791) e validação (1,811) próximos: sem *overfitting* relevante.
+
+**Marco:** a arquitetura deste capítulo é, em estrutura, **a mesma do GPT-2**. Para
+referência, o GPT-2 small tem 124 milhões de parâmetros, 12 blocos e 12 cabeças — mesmo
+desenho, outra escala.
+
 ---
 
 ## 5. Infraestrutura montada
@@ -215,11 +241,11 @@ dos PDFs, afetavam todos os capítulos):
 
 ## 7. Próximo passo
 
-**Capítulo 05 — Transformer.** O Capítulo 4 terminou com as duas metades na mão:
-**comunicação** (atenção) e **computação** (feedforward). O próximo capítulo junta as
-duas num **bloco**, adiciona **múltiplas cabeças** de atenção, **conexões residuais** e
-**layer normalization**, e empilha tudo em profundidade — chegando à arquitetura do
-GPT-2.
+**Capítulo 06 — Tokenization.** Com a arquitetura pronta, o gargalo passa a ser a
+entrada: hoje alimentamos o modelo com **um caractere por token**, o que alonga as
+sequências e gasta capacidade do modelo aprendendo a montar palavras a partir de letras.
+O próximo capítulo constrói um tokenizador **BPE** (*byte pair encoding*) do zero — o
+mesmo algoritmo que o GPT usa — e nos leva ao território de Unicode e UTF-8.
 
 ### Sobre os capítulos 8–10 (velocidade e escala)
 
