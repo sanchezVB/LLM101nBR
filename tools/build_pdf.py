@@ -63,8 +63,13 @@ EMOJI_REPLACEMENTS = {
     "┘": "+",
     "┤": "+",
     "┬": "+",
-    # sobrescritos/matematica sem cobertura
+    # sinais matematicos que parecem ASCII mas nao sao
+    "−": "-",     # U+2212 MINUS SIGN (diferente do hifen ASCII!)
+    "–": "-",     # en dash
+    # sobrescritos
     "ᵀ": "T",
+    "ᵗ": "t",
+    "ⁿ": "n",
     "⁰": "0",
     "⁴": "4",
     "⁵": "5",
@@ -72,6 +77,17 @@ EMOJI_REPLACEMENTS = {
     "⁷": "7",
     "⁸": "8",
     "⁹": "9",
+    # subscritos
+    "₀": "0",
+    "₁": "1",
+    "₂": "2",
+    "₃": "3",
+    "₄": "4",
+    "₅": "5",
+    "₆": "6",
+    "₇": "7",
+    "₈": "8",
+    "₉": "9",
 }
 # Rede de seguranca: remove o que sobrou de emoji (blocos pictograficos).
 # NAO inclui a faixa de setas (2190-21FF) nem matematica -- essas sao mapeadas acima.

@@ -7,9 +7,9 @@
 
 ## 1. Resumo executivo
 
-O projeto tem hoje uma **base sólida e publicada**: a **Fase I (Fundamentos) está
-completa** e a Fase II está em 3/4 — o **Transformer já está construído e funcionando**,
-e o **tokenizador** também. São **6 capítulos** prontos, testados e no GitHub. Cada
+O projeto tem hoje uma **base sólida e publicada**: as **Fases I e II estão completas**
+— o **Transformer**, o **tokenizador** e o **treino afinado** já estão construídos. São
+**7 capítulos** prontos, testados e no GitHub. Cada
 capítulo entregue inclui apostila, código executável, exercícios com soluções e PDF — e
 todo número citado no texto foi obtido rodando o código de verdade.
 
@@ -19,14 +19,14 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 
 | Indicador | Valor |
 |-----------|-------|
-| Capítulos concluídos | **6 de 17** (35%) |
-| Estado | Fase I completa; Fase II (Transformer) em 3/4 |
-| Melhor modelo | Transformer, **1,811** de loss (vs ~2,4 do bigrama) |
-| Repositório | Publicado e versionado (8 commits) |
-| Arquivos versionados | 42 |
-| Linhas de código (didático) | ~2.200 (Python) |
-| PDFs gerados | 6 capítulos + panorama + este relatório |
-| Verificação | 100% do código roda; autograd e LayerNorm batem com PyTorch |
+| Capítulos concluídos | **7 de 17** (41%) |
+| Estado | Fases I e II completas; próxima é a Fase III (velocidade) |
+| Melhor modelo | Transformer + agendamento de lr, **1,776** (vs ~2,4 do bigrama) |
+| Repositório | Publicado e versionado (9 commits) |
+| Arquivos versionados | 49 |
+| Linhas de código (didático) | ~2.900 (Python) |
+| PDFs gerados | 7 capítulos + panorama + este relatório |
+| Verificação | 100% do código roda; autograd, LayerNorm e AdamW batem com PyTorch |
 
 ---
 
@@ -47,7 +47,8 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 | `0547d63` | 01/06/2026 | Capítulo 03 — N-gram model (MLP) + dataset do IBGE |
 | `6f09fd3` | 01/06/2026 | Capítulo 04 — Attention + correções no gerador de PDF |
 | `1d7c34a` | 01/06/2026 | Capítulo 05 — Transformer (arquitetura GPT-2) |
-| (atual) | 01/06/2026 | Capítulo 06 — Tokenization (BPE do zero) |
+| `5f123b3` | 01/06/2026 | Capítulo 06 — Tokenization (BPE do zero) |
+| (atual) | 01/06/2026 | Capítulo 07 — Optimization (fecha a Fase II) |
 
 ---
 
@@ -68,13 +69,13 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 | 04 | Attention | **Concluído** |
 | 05 | Transformer | **Concluído** |
 | 06 | Tokenization | **Concluído** |
-| 07 | Optimization | A fazer (próximo) |
+| 07 | Optimization | **Concluído** |
 
 ### Fase III — Velocidade e escala
 
 | # | Capítulo | Estado |
 |---|----------|--------|
-| 08 | Device (CPU/GPU) | A fazer |
+| 08 | Device (CPU/GPU) | A fazer (próximo) |
 | 09 | Precision | A fazer |
 | 10 | Distributed | A fazer |
 | 11 | Datasets | A fazer |
@@ -100,11 +101,11 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 | Fase | Concluídos | % |
 |------|-----------|---|
 | I — Fundamentos | 3 / 3 | **100%** |
-| II — Transformer | 3 / 4 | 75% |
+| II — Transformer | 4 / 4 | **100%** |
 | III — Velocidade e escala | 0 / 4 | 0% |
 | IV — Inferência e refinamento | 0 / 4 | 0% |
 | V — Produto e além | 0 / 2 | 0% |
-| **TOTAL** | **6 / 17** | **35%** |
+| **TOTAL** | **7 / 17** | **41%** |
 
 ---
 
@@ -185,7 +186,8 @@ Conteúdo (9 páginas no PDF):
   **153.499 parâmetros**. Treina em ~6 min na CPU.
 - **`exercicios.md`** — 7 exercícios; solução E2 (ablação dos residuais) incluída.
 
-**Resultado:** loss de validação **1,811** — o melhor do curso. Progressão completa:
+**Resultado:** loss de validação **1,811** — o melhor do curso até então (superado pelo
+Cap. 7, que chega a 1,776 só com otimização). Progressão completa:
 2,4 (bigrama) → 1,967 (MLP) → 1,913 (atenção+ff) → **1,811 (Transformer)**. Treino
 (1,791) e validação (1,811) próximos: sem *overfitting* relevante.
 
@@ -217,6 +219,47 @@ tamanho** em português com acentos (usando as apostilas do curso como corpus), 
 frase passa de **50 para 25 tokens** — **53% de economia**. Como APIs de LLM cobram por
 token e o contexto é medido em tokens, escrever em português num tokenizador treinado em
 inglês custa mais caro pelo mesmo conteúdo. O capítulo mede isso.
+
+### Capítulo 07 — Optimization
+
+Conteúdo (11 páginas no PDF). Fecha a Fase II:
+
+- **Apostila** (`README.md`) — inicialização (de onde vem o `5/3` do Cap. 3), a escada
+  SGD → momentum → Adam → AdamW, correção de viés, weight decay desacoplado, warmup +
+  cosine decay, gradient clipping e como calibrá-lo.
+- **`initialization.py`** — mede o desvio padrão das ativações em 8 camadas com
+  diferentes ganhos: ganho errado faz o sinal morrer (0,003) ou saturar. Mostra também
+  que a LayerNorm reduz muito essa sensibilidade.
+- **`optimizers.py`** — SGD, SGD+momentum e **AdamW do zero**, este último **verificado
+  contra `torch.optim.AdamW`** (diferença 8,9e-08).
+- **`train_tuned.py`** — a **ablação** das quatro técnicas, uma por vez.
+- **`exercicios.md`** — 8 exercícios; solução E5 (curva da learning rate) incluída.
+
+**A ablação e seu resultado inesperado:**
+
+| Configuração | Loss validação | vs baseline |
+|--------------|----------------|-------------|
+| baseline (Cap. 5) | 1,8114 | — |
+| **só agendamento** | **1,7760** | **+0,0355** |
+| só clipping | 1,8114 | 0,0000 |
+| só weight decay 0,1 | 1,8646 | -0,0532 |
+| só init escalada | 1,8187 | -0,0073 |
+| tudo junto | 1,8110 | +0,0004 |
+
+Das quatro técnicas, **só o agendamento ajudou** — e chegou a **1,776**, o melhor modelo
+do curso, sem tocar na arquitetura. O clipping foi exatamente neutro (nenhum passo
+cortado). O weight decay alto **piorou** mais do que qualquer outra coisa ajudou, porque
+combate *overfitting* e este modelo não está decorando (treino 1,791 vs validação 1,811).
+A init escalada, criada para modelos de 12+ blocos, atrapalha num de 3.
+
+**Lição central:** "melhores práticas" não são aditivas nem universais. "Tudo junto" deu
+quase zero porque ganhos e perdas se cancelaram. A única forma de saber é medir uma por
+vez.
+
+**Um erro meu, documentado na apostila:** a primeira versão usava `GRAD_CLIP = 1.0` e
+cortava **99% dos passos** — deixando de ser clipping e virando normalização de todo
+gradiente. A correção (medir a norma típica antes de escolher o limite) virou seção do
+capítulo.
 
 ---
 
@@ -269,10 +312,9 @@ dos PDFs, afetavam todos os capítulos):
 
 ## 7. Próximo passo
 
-**Capítulo 07 — Optimization.** Já temos arquitetura (Cap. 5) e entrada (Cap. 6). Falta
-treinar **bem**. Até aqui usamos valores "razoáveis" escolhidos na mão: o capítulo abre
-essa caixa — **inicialização** dos pesos, o **AdamW** por dentro, agendamento da
-**learning rate** e *gradient clipping*. Fecha a Fase II.
+**Capítulo 08 — Device (CPU/GPU).** Começa a Fase III, sobre **velocidade**. Sair da CPU
+e levar o treino para a GPU, entendendo por que a diferença é de ordens de grandeza e o
+que exatamente muda no código. Ver a ressalva de hardware abaixo.
 
 ### Sobre os capítulos 8–10 (velocidade e escala)
 

@@ -63,6 +63,7 @@ llm101n-curso/
     ├── 04-attention/              ← self-attention, máscara causal, posicional
     ├── 05-transformer/            ← multi-head, residuais, LayerNorm, GPT-2
     ├── 06-tokenization/           ← Unicode/UTF-8 e BPE do zero
+    ├── 07-optimization/           ← init, AdamW do zero, warmup+cosine, clipping
     └── ...
 ```
 
