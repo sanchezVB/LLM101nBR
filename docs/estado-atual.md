@@ -9,7 +9,7 @@
 
 O projeto tem hoje uma **base sólida e publicada**: as **Fases I e II estão completas**
 — o **Transformer**, o **tokenizador** e o **treino afinado** já estão construídos — e a
-Fase III está na metade. São **9 capítulos** prontos, testados e no GitHub. Cada
+**Fase III está completa**. São **10 capítulos** prontos, testados e no GitHub. Cada
 capítulo entregue inclui apostila, código executável, exercícios com soluções e PDF — e
 todo número citado no texto foi obtido rodando o código de verdade.
 
@@ -19,13 +19,13 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 
 | Indicador | Valor |
 |-----------|-------|
-| Capítulos concluídos | **9 de 17** (53%) |
-| Estado | Fases I e II completas; Fase III em 2/4 |
+| Capítulos concluídos | **10 de 17** (59%) |
+| Estado | Fases I, II e III completas; próxima é a Fase IV |
 | Melhor modelo | Transformer + agendamento de lr, **1,776** (vs ~2,4 do bigrama) |
-| Repositório | Publicado e versionado (11 commits) |
-| Arquivos versionados | 65 |
-| Linhas de código (didático) | ~4.200 (Python) |
-| PDFs gerados | 9 capítulos + panorama + este relatório |
+| Repositório | Publicado e versionado (12 commits) |
+| Arquivos versionados | 73 |
+| Linhas de código (didático) | ~5.000 (Python) |
+| PDFs gerados | 10 capítulos + panorama + este relatório |
 | Verificação | 100% do código roda; autograd, LayerNorm e AdamW batem com PyTorch |
 
 ---
@@ -50,7 +50,8 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 | `5f123b3` | 01/06/2026 | Capítulo 06 — Tokenization (BPE do zero) |
 | `61269d0` | 01/06/2026 | Capítulo 07 — Optimization (fecha a Fase II) |
 | `b1b0318` | 01/06/2026 | Capítulo 08 — Device (CPU/GPU), medido na Radeon |
-| (atual) | 01/06/2026 | Capítulo 09 — Precision (fp16/bf16, loss scaling) |
+| `6f106c1` | 01/06/2026 | Capítulo 09 — Precision (fp16/bf16, loss scaling) |
+| (atual) | 01/06/2026 | Capítulo 10 — Distributed (fecha a Fase III) |
 
 ---
 
@@ -79,8 +80,8 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 |---|----------|--------|
 | 08 | Device (CPU/GPU) | **Concluído** |
 | 09 | Precision | **Concluído** |
-| 10 | Distributed | A fazer (próximo) |
-| 11 | Datasets | A fazer |
+| 10 | Distributed | **Concluído** |
+| 11 | Datasets | A fazer (próximo) |
 
 ### Fase IV — Inferência e refinamento
 
@@ -104,10 +105,10 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 |------|-----------|---|
 | I — Fundamentos | 3 / 3 | **100%** |
 | II — Transformer | 4 / 4 | **100%** |
-| III — Velocidade e escala | 2 / 4 | 50% |
+| III — Velocidade e escala | 3 / 4 | 75% |
 | IV — Inferência e refinamento | 0 / 4 | 0% |
 | V — Produto e além | 0 / 2 | 0% |
-| **TOTAL** | **9 / 17** | **53%** |
+| **TOTAL** | **10 / 17** | **59%** |
 
 ---
 
@@ -355,6 +356,42 @@ pode significar "seu programa morre".
 - **Pesos mestres:** somando 1e-4 a um peso 1,0 cem vezes, o fp32 chega a 1,010002 e o
   fp16/bf16 ficam em **1,000000** — o peso não se moveu nem uma vez.
 
+### Capítulo 10 — Distributed
+
+Conteúdo (10 páginas no PDF). Fecha a Fase III:
+
+- **Apostila** (`README.md`) — paralelismo de dados, all-reduce, o algoritmo em anel,
+  custo de comunicação, equivalência do DDP, batch efetivo e ZeRO.
+- **`dist_utils.py`** — rendezvous por arquivo e **detecção automática de interface de
+  rede** (ver o problema real abaixo).
+- **`allreduce.py`** — a primitiva do PyTorch **e um ring all-reduce implementado do
+  zero**, com send/recv e a alternância par/ímpar que evita deadlock.
+- **`ddp_train.py`** — treino com DDP e a prova de equivalência.
+- **`zero_memory.py`** — a conta de memória e o ZeRO-1 medido.
+- **`exercicios.md`** — 7 exercícios (todos rodam na CPU); solução E4 incluída.
+
+**Verificado com 4 processos (CPU, backend `gloo`):**
+
+- **Nosso ring all-reduce bate com o do PyTorch** — a quarta verificação contra a
+  biblioteca de referência no curso (depois de autograd, LayerNorm e AdamW).
+- **DDP reproduz exatamente o batch inteiro:** gradiente com 4 processos de 64 vs um
+  processo com 256 → diferença máxima **1,12e-08**.
+- **Pesos idênticos entre ranks** após 50 passos, apesar de dados diferentes.
+- **ZeRO-1 medido:** estado do otimizador de 8,54 MB → **2,10 MB por processo** (4,1x
+  menor, exatamente 1/N).
+- **Custo de comunicação:** 14 MB/s em tensores pequenos vs 371 MB/s em grandes — o mesmo
+  padrão de custo fixo da GPU (Cap. 8), e o motivo de frameworks agruparem em *buckets*.
+
+**O obstáculo real, que virou seção da apostila:** os processos **travavam para sempre**
+no `init_process_group`, sem erro nenhum. Causa: o hostname da máquina resolve para
+**54.232.189.113** (um IP público, por causa de um adaptador virtual), e o `gloo` escolhe
+a interface de rede resolvendo o hostname — o Windows recusava com erro 10049. A correção
+(`GLOO_SOCKET_IFNAME`) agora é **automática** no `dist_utils.py`. Lição registrada: em
+distribuído, o modo de falha normal não é o erro, é o **travamento silencioso**.
+
+**Não verificável aqui** (declarado no capítulo): speedup real com N GPUs, backend NCCL, e
+os estágios 2 e 3 do ZeRO (a tabela deles é aritmética, não medição).
+
 ---
 
 ## 5. Infraestrutura montada
@@ -406,10 +443,14 @@ dos PDFs, afetavam todos os capítulos):
 
 ## 7. Próximo passo
 
-**Capítulo 10 — Distributed.** Fecha a trilogia "Need for Speed": treinar em **vários
-dispositivos** ao mesmo tempo, com o `all-reduce` sincronizando os gradientes. Como a
-máquina tem uma GPU só, a **mecânica** será verificada com múltiplos processos na CPU
-(backend `gloo`) — e o limite declarado, como no Capítulo 9.
+**Capítulo 11 — Datasets.** Começa a Fase IV, e é a virada mais significativa do curso:
+trocamos os nomes por **texto de verdade**. O modelo deixa de gerar nomes e passa a gerar
+prosa.
+
+> **Aviso importante sobre a métrica:** o benchmark de **1,776** será aposentado ali. Prever
+> o próximo caractere em prosa é uma tarefa muito mais difícil que em nomes, então a loss
+> vai **subir** — e isso não é regressão, é mudança de tarefa. A partir do Capítulo 11 a
+> comparação recomeça.
 
 ### Sobre a Fase III (velocidade e escala) — situação de hardware **resolvida**
 

@@ -373,8 +373,8 @@ suporta: **ele elimina uma engrenagem inteira do treino.**
 
 Sendo explícito sobre o que foi verificado e o que não pôde ser:
 
-| | fp16 | bf16 | autocast |
-|---|---|---|---|
+| Dispositivo | fp16 | bf16 | autocast |
+|-------------|------|------|----------|
 | **CPU** | ✅ funciona (mas centenas de vezes mais lento) | ✅ funciona | ✅ funciona |
 | **Radeon RX 7600 (DirectML)** | ✅ funciona, ganho 0,98x | ❌ **aborta o processo** | ❌ não implementado |
 | **NVIDIA + CUDA** | não testado aqui | não testado aqui | não testado aqui |

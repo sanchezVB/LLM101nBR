@@ -39,6 +39,10 @@ DIST_DIR = ROOT / "dist"
 EMOJI_REPLACEMENTS = {
     # emojis e dingbats
     "✅": "[OK]",
+    "❌": "[nao]",
+    "❗": "(!)",
+    "✔": "[OK]",
+    "✖": "[nao]",
     "⏳": "[...]",
     "➡️": "->",
     "➡": "->",

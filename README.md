@@ -66,6 +66,7 @@ llm101n-curso/
     ├── 07-optimization/           ← init, AdamW do zero, warmup+cosine, clipping
     ├── 08-device/                 ← CPU vs GPU, benchmark, código portátil
     ├── 09-precision/              ← fp16/bf16, loss scaling, precisão mista
+    ├── 10-distributed/            ← all-reduce, DDP, ZeRO
     └── ...
 ```
 
@@ -137,7 +138,8 @@ Trabalhados ao longo dos capítulos, conforme aparecem:
 | 07 — Optimization | ✅ Completo (apostila + código + exercícios + PDF) |
 | 08 — Device (CPU/GPU) | ✅ Completo (apostila + código + exercícios + PDF) |
 | 09 — Precision | ✅ Completo (apostila + código + exercícios + PDF) |
-| 10–17 | ⏳ Planejados (syllabus aprovado) |
+| 10 — Distributed | ✅ Completo (apostila + código + exercícios + PDF) |
+| 11–17 | ⏳ Planejados (syllabus aprovado) |
 
 > Este repositório é construído **em fases**. O Capítulo 1 é a "fatia vertical" de
 > referência: define o padrão de qualidade (profundidade do texto, estilo do código,
