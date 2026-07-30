@@ -11,9 +11,12 @@ e' instavel no Windows com reportlab 4.x.
 Uso:
     python tools/build_pdf.py --chapter 01      # PDF de um capitulo
     python tools/build_pdf.py --all             # apostila completa (todos)
+    python tools/build_pdf.py --gabaritos       # PDF separado com as solucoes
 
-Os PDFs de capitulo ficam dentro da pasta do proprio capitulo;
-a apostila completa vai para dist/.
+Os PDFs de capitulo ficam dentro da pasta do proprio capitulo, e o de gabaritos
+em docs/ -- os dois sao material de LEITURA e ficam versionados. A apostila
+completa vai para dist/, que e' ignorado pelo git por ser so' uma juncao dos
+capitulos, regeravel com --all.
 """
 
 import argparse
@@ -70,6 +73,8 @@ EMOJI_REPLACEMENTS = {
     # sinais matematicos que parecem ASCII mas nao sao
     "−": "-",     # U+2212 MINUS SIGN (diferente do hifen ASCII!)
     "–": "-",     # en dash
+    "≫": ">>",    # U+226B  (muito maior que)
+    "≪": "<<",
     # sobrescritos
     "ᵀ": "T",
     "ᵗ": "t",
@@ -321,6 +326,35 @@ def build_all():
     render_pdf(cover + "".join(parts), DIST_DIR / "LLM101n-BR-Apostila-completa.pdf", "LLM101n-BR")
 
 
+def build_gabaritos():
+    """PDF SEPARADO com todos os gabaritos.
+
+    Separado de proposito. Se as respostas fossem para o PDF do capitulo, elas
+    ficariam na pagina seguinte a' dos exercicios -- e um exercicio cuja resposta
+    esta' a um rolar de distancia nao e' um exercicio.
+
+    Aqui o leitor precisa abrir OUTRO arquivo, o que ja' e' uma decisao
+    consciente.
+    """
+    parts = []
+    for ch_dir in sorted(CHAPTERS_DIR.glob("[0-9][0-9]-*")):
+        gab = ch_dir / "solucoes" / "gabarito.md"
+        if not gab.exists():
+            continue
+        if parts:
+            parts.append('<div style="page-break-before: always;"></div>')
+        parts.append(md_to_html(gab.read_text(encoding="utf-8")))
+    if not parts:
+        raise SystemExit("Nenhum solucoes/gabarito.md encontrado.")
+    cover = cover_html("LLM101n-BR", "Gabaritos comentados")
+    saida = ROOT / "docs"
+    saida.mkdir(parents=True, exist_ok=True)
+    # vai para docs/ (versionado), nao para dist/ (ignorado): este PDF e' material
+    # de leitura, como os PDFs de capitulo -- nao um artefato de build
+    render_pdf(cover + "".join(parts), saida / "LLM101n-BR-Gabaritos.pdf",
+               "LLM101n-BR — Gabaritos")
+
+
 def build_file(md_path: str, out_path: str | None, title: str | None):
     """Gera PDF de um arquivo Markdown qualquer (ex.: docs/panorama.md)."""
     src = Path(md_path)
@@ -340,11 +374,15 @@ def main():
     g.add_argument("--chapter", help="numero do capitulo, ex.: 01")
     g.add_argument("--all", action="store_true", help="apostila completa")
     g.add_argument("--file", help="caminho de um .md avulso para virar PDF")
+    g.add_argument("--gabaritos", action="store_true",
+                   help="PDF separado com todos os gabaritos")
     ap.add_argument("--out", help="caminho de saida do PDF (use com --file)")
     ap.add_argument("--title", help="titulo no rodape (use com --file)")
     args = ap.parse_args()
     if args.all:
         build_all()
+    elif args.gabaritos:
+        build_gabaritos()
     elif args.file:
         build_file(args.file, args.out, args.title)
     else:
