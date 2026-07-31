@@ -56,8 +56,13 @@ hora: a alternativa era publicar respostas que a própria checagem do curso já 
 
 > **E os outros exercícios deste capítulo?** E1, E3 e E5 não dependem de treino (são
 > conceituais, de tokenização e de contagem de previsões), então o orçamento não os afeta.
-> O E6 (*model collapse*) roda com 400 passos e a sua conclusão **não foi verificada no
-> orçamento cheio** — está declarado lá.
+> O **E6** (*model collapse*) foi reverificado em 3.000 passos
+> ([`e6_orcamento_cheio.py`](e6_orcamento_cheio.py)) e a conclusão **se manteve, doze vezes
+> mais forte**: a degradação passou de +0,45 para **+5,33**.
+>
+> Ou seja: dos três exercícios deste capítulo que dependem de treino, **dois inverteram** e
+> **um se confirmou**. Não há como saber qual é qual sem medir — e essa é exatamente a
+> razão de medir.
 
 > **A regra que fica.** "Esta pergunta é estrutural, logo o orçamento não importa" é uma
 > hipótese, não um argumento. Rode a sua configuração com o triplo dos passos e veja se a
@@ -309,18 +314,23 @@ métrica comparável entre capítulos. A partir daqui, não há motivo para isso
 
 ## E6 — Dados sintéticos e *model collapse*
 
-> ⚠️ **Ressalva de orçamento, declarada e não resolvida.** Os números abaixo são de **400
-> passos**, e neste capítulo dois exercícios (E4 e E7) tiveram a conclusão **invertida** ao
-> passar para 3.000. Este não foi reverificado — custaria mais duas horas de treino.
+> ✅ **Reverificado no orçamento cheio.** Este era o último exercício do capítulo apoiado
+> em 400 passos, num capítulo onde o E4 e o E7 tiveram a conclusão **invertida** ao passar
+> para 3.000. Eu tinha publicado a conclusão com uma justificativa — não uma medição — de
+> que ela deveria sobreviver. [`e6_orcamento_cheio.py`](e6_orcamento_cheio.py) mediu:
 >
-> Por que ainda assim publico a conclusão: aqui o efeito medido é **grande** (+0,45 de loss
-> de validação) e a direção é sustentada por um argumento informacional que não depende de
-> quanto se treina — amostrar de uma distribuição não pode criar informação que ela não
-> tem. Nos casos que inverteram, o efeito era pequeno e o mecanismo (overfitting) era
-> justamente algo que **só aparece com muitos passos**.
+> | Modelo | Treino | Validação real |
+> |---|---|---|
+> | A (corpus de Machado) | 2,7816 | 3,9241 |
+> | B (texto gerado pelo A) | **0,1149** | **9,2588** |
 >
-> Isso é uma justificativa, não uma medição. Se você tiver as duas horas, **meça** — e se o
-> resultado mudar, esta ressalva estava certa em existir.
+> **Degradação de +5,33**, contra +0,45 com 400 passos. Perplexidade de 50,6 para
+> **10.496**. A conclusão não só se manteve como ficou **doze vezes mais forte** — e a
+> justificativa que eu tinha dado (o argumento informacional não depende do orçamento)
+> estava certa.
+>
+> Os números da seção abaixo continuam sendo os de 400 passos, porque é o que o
+> `gabarito.py` roda em poucos minutos. As conclusões valem nos dois orçamentos.
 
 | Modelo | Treino | Validação **real** |
 |---|---|---|
@@ -335,6 +345,12 @@ tem nome na literatura: ***model collapse***.
 **Olhe a coluna de treino.** A loss de treino do modelo B é **menor** que a do A (4,30
 contra 4,45). Se você olhasse só a curva de treino, concluiria que o B está aprendendo
 melhor.
+
+E no orçamento cheio o contraste fica grotesco: **0,1149 de treino contra 9,2588 de
+validação**. O modelo B decorou o texto sintético quase perfeitamente — loss de treino 24
+vezes menor que a do A — enquanto ficava 2,4 vezes pior no texto real. É a demonstração
+mais nítida deste curso de que **uma curva de treino excelente pode acompanhar um modelo
+destruído**.
 
 Não está. Texto gerado por um modelo é **mais previsível** que texto humano — menos
 vocabulário, menos construções raras, menos surpresa. Ficar bom em prever texto fácil não
