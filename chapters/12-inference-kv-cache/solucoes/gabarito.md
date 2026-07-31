@@ -139,20 +139,62 @@ que vem do contexto.
 
 ## E4 — Meça o ganho
 
-Rode [`benchmark_cache.py`](../benchmark_cache.py) com a máquina ociosa.
+[`benchmark_cache.py`](../benchmark_cache.py), máquina ociosa:
 
-**1.** O **ms por token** do caminho ingênuo **cresce** com o comprimento — cada token novo
-reprocessa um contexto maior. O do caminho com cache fica praticamente **constante**. É o
-ponto todo do capítulo.
+| Tokens | Ingênuo | Com cache | Speedup | ms/token ing. | ms/token cache |
+|---|---|---|---|---|---|
+| 16 | 0,070 s | 0,045 s | 1,53x | 4,3 | 2,8 |
+| 32 | 0,122 s | 0,085 s | 1,44x | 3,8 | 2,7 |
+| 64 | 0,272 s | 0,170 s | 1,60x | 4,3 | 2,7 |
+| 128 | 0,906 s | 0,469 s | **1,93x** | 7,1 | 3,7 |
 
-**2.** O speedup **cresce** com o comprimento, porque o custo do caminho ingênuo cresce e o
-do cache não. Ele para de crescer quando o contexto satura em `block_size` (128 aqui):
-daí em diante o ingênuo também passa a ter custo constante, só que alto.
+### O número que contradiz a Seção 1 da apostila
 
-**3. Para um único token, o cache não ajuda** — é exatamente um prefill nos dois casos. O
-cache começa a pagar a partir do segundo token gerado. Não há comprimento em que ele
-*atrapalhe*: o custo extra é a alocação da memória do cache, que não aparece no relógio
-neste tamanho.
+A apostila mostra que o caminho ingênuo desperdiça **98,4%** das posições processadas.
+Seria natural esperar um ganho de dezenas de vezes.
+
+**O ganho medido é 1,93x.**
+
+Não é erro de medição nem cache mal implementado. A Seção 2 do mesmo benchmark explica:
+
+| Medição | Custo |
+|---|---|
+| Prefill de 64 tokens de uma vez | 5,66 ms → **0,09 ms por token** |
+| Decode de 1 token com cache | **3,30 ms** |
+| Razão | **37x** |
+
+Processar uma *posição* custa 0,09 ms. Processar uma *chamada* custa ~3,3 ms. A diferença
+é **custo fixo**: laço Python, despacho do PyTorch, alocação de tensores, leitura dos pesos
+das 4 camadas.
+
+E os dois caminhos fazem o **mesmo número de chamadas** — uma por token gerado. Ambos pagam
+128 × ~3,3 ms ≈ 420 ms só de overhead. O cache elimina o trabalho *dentro* de cada chamada,
+que neste modelo é a menor parte da conta.
+
+> **98% do cálculo eliminado, 1,93x de ganho.** É a lição do
+> [Capítulo 8](../../08-device/solucoes/gabarito.md) reaparecendo: otimizar o que não
+> domina não acelera. O KV-cache é indispensável — mas o *ganho* que ele entrega depende de
+> o cálculo ser o gargalo, e num modelo de 2,2 M parâmetros na CPU ele não é.
+
+Onde o ganho aparece de verdade: **modelos grandes** (o trabalho por posição cresce),
+**contextos longos** (o desperdício quadrático cresce) e **GPU** (o custo fixo por chamada
+é diluído). Num 7B com contexto de milhares de tokens, a diferença é entre viável e
+inviável — mas isso é uma extrapolação, não algo medido aqui.
+
+### As respostas
+
+**1.** O `ms/token` do ingênuo cresce, mas só com clareza no último ponto (4,3 → 3,8 → 4,3
+→ **7,1**). Até 64 tokens fica praticamente plano: o custo fixo domina e o contexto ainda é
+curto. O do cache também sobe um pouco no fim (2,7 → 3,7), pela leitura de um cache maior —
+ou seja, "constante" é aproximação, não fato.
+
+**2. O speedup cresce, devagar e não de forma monotônica** (1,53 → 1,44 → 1,60 → 1,93). A
+queda em 32 tokens está dentro do ruído. A tendência é de crescimento, pelo motivo certo: o
+custo do ingênuo cresce com o contexto e o do cache quase não.
+
+**3. Para um único token o cache não ajuda** — é um prefill nos dois casos. Ele começa a
+pagar do segundo token em diante, e não há comprimento em que atrapalhe: a alocação do
+cache não aparece no relógio neste tamanho.
 
 ---
 

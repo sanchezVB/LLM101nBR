@@ -307,8 +307,8 @@ escolher, operação por operação:
 | Em 16 bits (rápido, e o erro não acumula) | Em 32 bits (onde a precisão importa) |
 |------------------------------------------|--------------------------------------|
 | matmul e convolução — onde está ~95% do tempo | a cópia **mestra** dos pesos |
-| | somas longas: softmax, LayerNorm, loss |
-| | o estado do otimizador (`m` e `v`) |
+| — | somas longas: softmax, LayerNorm, loss |
+| — | o estado do otimizador (`m` e `v`) |
 
 O ganho vem da coluna da esquerda; a estabilidade, da direita.
 

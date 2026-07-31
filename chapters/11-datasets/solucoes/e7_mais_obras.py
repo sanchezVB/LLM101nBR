@@ -93,25 +93,16 @@ for n_obras in (4, 6, 8, 11):
           flush=True)
 
 print("""
-  Respostas:
-  1. Acrescentar obras melhora a loss de validacao -- mas menos do que a
-     intuicao sugere, e por um motivo que vale entender: 'Memorial de Aires' e'
-     UMA obra especifica, com o estilo tardio de Machado. Mais texto do mesmo
-     autor ajuda ate' certo ponto; depois disso, o que separa o modelo da
-     validacao nao e' falta de dados, e' capacidade do modelo.
+  ATENCAO: estes numeros sao de 400 passos, e o ranking que eles produzem esta'
+  ERRADO. Rodando o mesmo experimento com os 3.000 passos da apostila
+  (e7_orcamento_cheio.py), a ordem se INVERTE por completo:
 
-  2. O ganho satura. Compare com a Secao 3 do gabarito.md: quadruplicar o corpus
-     rende bem menos que ir de 155 para 64 mil nomes rendeu no Capitulo 3.
+      400 passos : 6 < 8 < 4 < 11   (11 obras e' a PIOR)
+     3000 passos : 11 < 8 < 6 < 4   (11 obras e' a MELHOR, e e' monotonico)
 
-  3. A logica do Capitulo 3 vale em DIRECAO, nao em magnitude. O 'gap' entre
-     treino e validacao encolhe com mais dados, confirmando que parte do
-     problema era memorizacao. Mas 1,6 MB de texto ja' e' um regime muito
-     diferente de 155 nomes: la' o modelo tinha 10 exemplos por parametro; aqui
-     ja' tem centenas de milhares de tokens. Melhorias ficam progressivamente
-     mais caras -- e' a forma de toda curva de escala.
+  Com 400 passos o modelo nao completa uma passada pelo corpus maior, entao nao
+  ha' overfitting -- e o overfitting e' justamente o mecanismo pelo qual mais
+  dados ajudam. O unico sinal que sobra e' o de distribuicao.
 
-  NOTA SOBRE 'POESIAS COMPLETAS' (a 11a obra): e' o unico livro em VERSO da
-  lista. Misturar poesia com prosa muda a distribuicao -- quebras de linha,
-  metrica, vocabulario. Se a loss piorar exatamente ao incluir essa obra, a
-  causa provavel e' essa, e nao saturacao. Mais dados nao ajudam se forem dados
-  de OUTRA distribuicao que a validacao. Vale conferir na tabela.""")
+  As respostas do E7 estao no gabarito.md, medidas no orcamento cheio. Este
+  script continua util para ver o pipeline funcionando depressa.""")

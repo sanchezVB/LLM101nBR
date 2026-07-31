@@ -42,9 +42,22 @@ compara os **rankings**:
 **O ranking virou.** Com 400 passos, `block_size=256` parecia o melhor; com 1.200 ele
 perde para 128 (4,1270 contra 4,1649). O E4 não era estrutural o bastante para escapar.
 
-Por isso o número do E4 abaixo vem de [`e4_orcamento_cheio.py`](e4_orcamento_cheio.py),
-rodado com os **3.000 passos** da apostila — cerca de uma hora de treino. Vale a hora: a
-alternativa era publicar uma resposta que a própria checagem do curso já tinha desmentido.
+Refeito com os **3.000 passos** da apostila, virou de novo — e o mesmo aconteceu com o E7:
+
+| Exercício | Com 400 passos | Com 3.000 passos |
+|---|---|---|
+| **E4** (contexto) | 256 < 128 < 32 | **32 < 128 < 256** (inverteu por completo) |
+| **E7** (mais obras) | 6 < 8 < 4 < 11 | **11 < 8 < 6 < 4** (inverteu por completo) |
+
+Duas inversões totais, nos dois exercícios que testei. Por isso as respostas do E4 e do E7
+vêm de [`e4_orcamento_cheio.py`](e4_orcamento_cheio.py) e
+[`e7_orcamento_cheio.py`](e7_orcamento_cheio.py) — cerca de uma hora de treino cada. Vale a
+hora: a alternativa era publicar respostas que a própria checagem do curso já desmentia.
+
+> **E os outros exercícios deste capítulo?** E1, E3 e E5 não dependem de treino (são
+> conceituais, de tokenização e de contagem de previsões), então o orçamento não os afeta.
+> O E6 (*model collapse*) roda com 400 passos e a sua conclusão **não foi verificada no
+> orçamento cheio** — está declarado lá.
 
 > **A regra que fica.** "Esta pergunta é estrutural, logo o orçamento não importa" é uma
 > hipótese, não um argumento. Rode a sua configuração com o triplo dos passos e veja se a
@@ -296,6 +309,19 @@ métrica comparável entre capítulos. A partir daqui, não há motivo para isso
 
 ## E6 — Dados sintéticos e *model collapse*
 
+> ⚠️ **Ressalva de orçamento, declarada e não resolvida.** Os números abaixo são de **400
+> passos**, e neste capítulo dois exercícios (E4 e E7) tiveram a conclusão **invertida** ao
+> passar para 3.000. Este não foi reverificado — custaria mais duas horas de treino.
+>
+> Por que ainda assim publico a conclusão: aqui o efeito medido é **grande** (+0,45 de loss
+> de validação) e a direção é sustentada por um argumento informacional que não depende de
+> quanto se treina — amostrar de uma distribuição não pode criar informação que ela não
+> tem. Nos casos que inverteram, o efeito era pequeno e o mecanismo (overfitting) era
+> justamente algo que **só aparece com muitos passos**.
+>
+> Isso é uma justificativa, não uma medição. Se você tiver as duas horas, **meça** — e se o
+> resultado mudar, esta ressalva estava certa em existir.
+
 | Modelo | Treino | Validação **real** |
 |---|---|---|
 | modelo A (corpus de Machado) | 4,4455 | **4,6957** |
@@ -351,9 +377,14 @@ colapsa. É a base do que o [Capítulo 15](../../15-reinforcement-learning/) vai
 | 50% | 310.567 | 4,4252 | 4,7330 | 0,3077 |
 | 100% | 621.134 | 4,4455 | **4,6957** | **0,2501** |
 
-**1 e 2.** Mais dados melhoram a validação, com **retorno decrescente**: dobrar de 25% para
-50% rendeu 0,027 de loss; dobrar de novo rendeu 0,037. Ganhos na mesma casa para um esforço
-que dobra.
+**1 e 2.** Mais dados melhoram a validação. Os ganhos são pequenos e da mesma ordem ao
+dobrar o corpus (0,027 e depois 0,037).
+
+> ⚠️ **Não leia isto como saturação.** Estes números são de **400 passos**, e a seção
+> seguinte mostra que nesse orçamento o modelo mal completa uma passada pelo corpus — não
+> há épocas suficientes para o overfitting aparecer, que é justamente o mecanismo pelo qual
+> mais dados ajudam. Com os 3.000 passos da apostila, o ganho é **muito maior e não
+> satura**. Esta tabela serve para ver o mecanismo depressa, não para concluir sobre escala.
 
 **3. A lógica do Capítulo 3 vale em direção, não em magnitude.**
 
@@ -368,8 +399,10 @@ Mas compare a escala:
 | Cap. 11 | 155 mil → 621 mil tokens | 0,40 → 0,25 |
 
 Lá o modelo tinha ~10 exemplos por parâmetro; aqui já tem centenas de milhares de tokens.
-**Melhorias ficam progressivamente mais caras** — é a forma de toda curva de escala, e é
-por isso que os laboratórios discutem *ordens de grandeza* de dados, não porcentagens.
+
+> Eu ia escrever aqui que "melhorias ficam progressivamente mais caras, é a forma de toda
+> curva de escala". A frase é verdadeira **em geral** e não descreve o que foi medido: no
+> orçamento cheio o ganho não deu sinal de desacelerar. Ver a seção seguinte.
 
 ### Versão literal: acrescentando obras de verdade
 
@@ -386,3 +419,60 @@ O enunciado pede para **acrescentar obras**. A lista completa de Machado no Gute
    certo a pagar.
 2. **A validação não muda.** *Memorial de Aires* continua fora do treino. Sem isso as
    losses não seriam comparáveis entre configurações.
+
+### Os resultados, com os 3.000 passos da apostila
+
+[`e7_orcamento_cheio.py`](e7_orcamento_cheio.py):
+
+| Obras | Tokens | Treino | Validação | **Gap** |
+|---|---|---|---|---|
+| 4 | 617.457 | 2,8302 | 3,9989 | 1,1687 |
+| 6 | 812.973 | 2,9886 | 3,7763 | 0,7877 |
+| 8 | 1.073.284 | 3,0770 | 3,7120 | 0,6350 |
+| 11 | 1.427.186 | 3,1520 | **3,6712** | **0,5192** |
+
+**Perfeitamente monotônico nas três colunas**, e cada uma conta um pedaço da mesma
+história:
+
+- a **validação** melhora sem parar — mais dados, melhor generalização;
+- o **treino piora** sem parar — corpus mais diverso é mais difícil de decorar;
+- o **gap** despenca de 1,17 para 0,52 — que é a definição de menos overfitting.
+
+**1 e 2. Sim, acrescentar obras melhora, e não saturou** dentro do que foi testado. Indo de
+617 mil para 1,43 milhão de tokens, a validação cai 0,33. Não há sinal de platô — o que
+sugere que este modelo ainda está limitado por **dados**, não por capacidade.
+
+### A resposta com 400 passos era o oposto
+
+| Orçamento | Ranking (melhor → pior) |
+|---|---|
+| 400 passos | 6 < 8 < 4 < **11 (o pior)** |
+| 3.000 passos | **11 (o melhor)** < 8 < 6 < 4 |
+
+Com o orçamento curto, a conclusão era "melhora até 6 obras e depois piora". Com o
+orçamento cheio, é "melhora sempre, monotonicamente". A inversão é **completa**.
+
+E há uma lição a mais escondida aí. Eu tinha escrito uma hipótese específica para explicar
+por que 11 obras seria pior: *Poesias Completas* é o único livro em **verso**, e misturar
+poesia com prosa mudaria a distribuição. A hipótese era plausível, específica, e parecia
+**confirmada** pelos dados de 400 passos.
+
+No orçamento cheio, 11 obras é a **melhor** configuração. O efeito regularizador de mais
+dados supera a diferença de gênero — e a minha explicação bonita estava explicando um
+artefato de orçamento.
+
+> **Por que os dois orçamentos discordam.** Com 400 passos, o modelo vê ~1,6 M de tokens:
+> nem uma passada completa pelo corpus maior. Ninguém decora nada, e o único sinal que
+> sobra é o de **distribuição** — daí a poesia atrapalhar. Com 3.000 passos ele vê ~12 M de
+> tokens: 20 passadas pelo corpus pequeno contra 8,6 pelo grande. Aí o que domina é
+> **overfitting**, e mais dados ganham com folga.
+>
+> Note que o confundimento aponta na direção **oposta** à do E4: lá, a configuração "maior"
+> fazia *mais* épocas; aqui, faz *menos*. É o mesmo mecanismo produzindo conclusões
+> invertidas — e é por isso que a pergunta "quantas épocas cada configuração faz?" deveria
+> vir antes de qualquer interpretação.
+
+**3. A lógica do Capítulo 3 vale, e agora com força.** Lá, aumentar os dados de 155 para 64
+mil nomes levou o gap de 5,7 para ~0. Aqui, dobrar o corpus leva o gap de 1,17 para 0,52.
+Direção idêntica, magnitude menor — e, ao contrário do que o experimento com frações do
+corpus sugeria, **ainda longe de saturar**.

@@ -27,7 +27,7 @@ velocidade e escala.
 
 CPU e GPU resolvem problemas diferentes, e a diferença está no desenho:
 
-| | CPU | GPU |
+| Característica | CPU | GPU |
 |---|---|---|
 | Núcleos | poucos (4–32), muito rápidos | milhares, individualmente lentos |
 | Otimizada para | **latência** — terminar *uma* tarefa rápido | **vazão** — terminar *muitas* tarefas por segundo |

@@ -48,6 +48,25 @@ Para gerar 128 tokens com contexto 128, o modelo executa:
 **Mais de 98% do cálculo é jogado fora.** Não é uma ineficiência de implementação — é o
 algoritmo, escrito da forma mais direta possível.
 
+### E quanto isso vale no relógio? Menos do que você espera
+
+Guarde este número antes de seguir, porque ele evita uma conclusão errada. Eliminando 98,4%
+do trabalho, o ganho medido neste modelo é de **1,93x** — não 60x.
+
+| Tokens gerados | Ingênuo | Com cache | Speedup |
+|---|---|---|---|
+| 16 | 0,070 s | 0,045 s | 1,53x |
+| 128 | 0,906 s | 0,469 s | **1,93x** |
+
+O motivo aparece na Seção 7: existe um **custo fixo por chamada** (~3,3 ms aqui) que os
+dois caminhos pagam igualmente, uma vez por token gerado. O cache elimina o trabalho
+*dentro* da chamada — que num modelo de 2,2 M parâmetros na CPU é a menor parte da conta.
+
+> Isso não torna o KV-cache dispensável; torna o **capítulo honesto**. A técnica é
+> indispensável em escala real, onde o cálculo domina. Aqui ela é ensinável e o ganho é
+> modesto. É a mesma lição do [Capítulo 8](../08-device/README.md): otimizar o que não
+> domina não acelera.
+
 ---
 
 ## 2. Por que dá para não repetir

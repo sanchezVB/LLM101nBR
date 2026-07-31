@@ -295,7 +295,7 @@ Repare no que aconteceu a partir do passo 1500: a loss de **treino** continua ca
 (3,20 → 2,76) enquanto a de **validação** praticamente estaciona (3,94 → 3,95). Isso é
 *overfitting*, o mesmo fenômeno do Capítulo 3 — e desta vez a causa é fácil de calcular:
 
-| | Valor |
+| Grandeza | Valor |
 |---|---|
 | Parâmetros do modelo | 2.196.352 |
 | Tokens de treino | 621.134 |
