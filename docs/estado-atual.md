@@ -9,7 +9,7 @@
 
 O projeto tem hoje uma **base sólida e publicada**: as **Fases I, II e III estão
 completas** — o Transformer, o tokenizador, o treino afinado e o pipeline de dados — e a
-**Fase IV está pela metade**. São **13 capítulos** prontos, testados e no GitHub. Cada
+**Fase IV está em 3 de 4**. São **14 capítulos** prontos, testados e no GitHub. Cada
 capítulo entregue inclui apostila, código executável, exercícios com gabarito **medido** e
 PDF — e todo número citado no texto foi obtido rodando o código de verdade.
 
@@ -19,14 +19,14 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 
 | Indicador | Valor |
 |-----------|-------|
-| Capítulos concluídos | **13 de 17** (76%) |
-| Estado | Fases I, II e III completas; Fase IV em 2/4 |
+| Capítulos concluídos | **14 de 17** (82%) |
+| Estado | Fases I, II e III completas; Fase IV em 3/4 |
 | Modelo atual | Transformer de 2,2 M params escrevendo **prosa em português** (perplexidade 51,3) |
-| Repositório | Publicado e versionado (24 commits) |
-| Arquivos versionados | 133 |
-| Linhas de código (didático) | ~10.200 (Python) |
-| **Exercícios com gabarito medido** | **92 de 92 (100%)** |
-| PDFs gerados | 13 capítulos + gabaritos + panorama + este relatório |
+| Repositório | Publicado e versionado (29 commits) |
+| Arquivos versionados | 143 |
+| Linhas de código (didático) | ~11.200 (Python) |
+| **Exercícios com gabarito medido** | **99 de 99 (100%)** |
+| PDFs gerados | 14 capítulos + gabaritos + panorama + este relatório |
 | Verificação | `smoke_test.py`: 61 scripts, **nenhuma falha**; todo gabarito vem de execução |
 
 ---
@@ -56,7 +56,9 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 | `27870ea` | 30/07/2026 | Capítulo 11 — Datasets, e gabaritos dos capítulos 1–11 |
 | `bb34942` | 30/07/2026 | Capítulo 12 — Inference I: KV-cache |
 | `0ea8470` | 30/07/2026 | E7 do cap. 11 e E4 do cap. 12 refeitos no orçamento cheio |
-| (atual) | 30/07/2026 | Capítulo 13 — Inference II: Quantization |
+| `3e9a403` | 30/07/2026 | Capítulo 13 — Inference II: Quantization |
+| `b9620bc` | 30/07/2026 | Smoke test do curso inteiro (achou 3 bugs) |
+| (atual) | 30/07/2026 | Capítulo 14 — Finetuning I: SFT |
 
 ---
 
@@ -94,7 +96,7 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 |---|----------|--------|
 | 12 | Inference I: KV-cache | **Concluído** |
 | 13 | Inference II: Quantization | **Concluído** |
-| 14 | Finetuning I: SFT | A fazer |
+| 14 | Finetuning I: SFT | **Concluído** |
 | 15 | Finetuning II: RL | A fazer |
 
 ### Fase V — Produto e além
@@ -111,9 +113,9 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 | I — Fundamentos (cap. 1–3) | 3 / 3 | **100%** |
 | II — Transformer (cap. 4–7) | 4 / 4 | **100%** |
 | III — Velocidade e escala (cap. 8–11) | 4 / 4 | **100%** |
-| IV — Inferência e refinamento (cap. 12–15) | 2 / 4 | 50% |
+| IV — Inferência e refinamento (cap. 12–15) | 3 / 4 | 75% |
 | V — Produto e além (cap. 16–17) | 0 / 2 | 0% |
-| **TOTAL** | **13 / 17** | **76%** |
+| **TOTAL** | **14 / 17** | **82%** |
 
 ---
 
