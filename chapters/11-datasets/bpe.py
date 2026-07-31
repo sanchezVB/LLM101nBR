@@ -111,7 +111,18 @@ if __name__ == "__main__":
     # -----------------------------------------------------------------------
     # 1. Treino sobre os nomes.
     # -----------------------------------------------------------------------
-    texto_completo = (Path(__file__).parent / "names.txt").read_text(encoding="utf-8")
+    # Este arquivo e' o mesmo do Capitulo 6, e a demo dele usava names.txt.
+    # O Capitulo 11 nao tem names.txt (o corpus aqui e' Machado), entao a demo
+    # busca o do Capitulo 6. Se nem ele existir, avisa em vez de estourar.
+    nomes = Path(__file__).parent.parent / "06-tokenization" / "names.txt"
+    if not nomes.exists():
+        raise SystemExit(
+            f"Demo do BPE precisa de {nomes}, que nao foi encontrado.\n"
+            f"Para usar o tokenizador ja' treinado neste capitulo:\n"
+            f"    python -c \"from dataset import carregar_tokenizador; "
+            f"print(len(carregar_tokenizador()[0]))\""
+        )
+    texto_completo = nomes.read_text(encoding="utf-8")
     treino = texto_completo[:TRAIN_BYTES]
 
     print(f"=== 1. treinando BPE (vocab_size={VOCAB_SIZE}) ===")

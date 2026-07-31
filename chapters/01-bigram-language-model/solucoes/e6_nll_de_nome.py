@@ -11,7 +11,11 @@ Run:
 import torch
 
 # --- rebuild P exactly like in bigram.py (count-based, with +1 smoothing) ---
-words = open("../names.txt", "r", encoding="utf-8").read().splitlines()
+# caminho relativo ao ARQUIVO, nao ao diretorio de onde se roda -- assim o
+# script funciona tanto de dentro de solucoes/ quanto da pasta do capitulo
+from pathlib import Path
+words = (Path(__file__).resolve().parent.parent / "names.txt").read_text(
+    encoding="utf-8").splitlines()
 words = [w.strip() for w in words if w.strip()]
 
 chars = sorted(list(set("".join(words))))

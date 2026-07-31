@@ -30,7 +30,19 @@ def normalize(name: str) -> str:
 def main():
     names = []
     seen = set()
-    with open("_ibge.csv", encoding="utf-8") as f:
+    from pathlib import Path
+    # NAO chamar esta variavel de 'csv': o modulo csv e' usado logo abaixo
+    caminho_csv = Path(__file__).resolve().parent / "_ibge.csv"
+    if not caminho_csv.exists():
+        raise SystemExit(
+            f"Arquivo {caminho_csv.name} nao encontrado.\n"
+            f"Baixe antes (uma vez so'):\n"
+            f"    curl -L -o _ibge.csv https://raw.githubusercontent.com/"
+            f"datasets-br/prenomes/master/data/nomes-censos-ibge.csv\n"
+            f"O names.txt ja' pronto esta' versionado -- este script so' e' "
+            f"preciso para regera-lo."
+        )
+    with open(caminho_csv, encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:                       # ja vem ordenado por frequencia
             n = normalize(row["Nome"])
