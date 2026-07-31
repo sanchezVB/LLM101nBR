@@ -29,3 +29,10 @@ _*.png
 # rodavel sem esperar download + tokenizacao.
 _brutos/
 *.pt
+
+# EXCECAO: o checkpoint do Cap. 11 e' versionado de proposito.
+# Ele e' o ponto de partida dos capitulos 12 (KV-cache) e 13 (quantizacao) --
+# sem ele, os dois nao rodam e exigem 18 minutos de treino antes. Sao 8,6 MB,
+# contra 1,2 MB do maior outro arquivo do repo: caro em termos relativos e
+# barato em absoluto, e paga por si em usabilidade.
+!chapters/11-datasets/modelo.pt

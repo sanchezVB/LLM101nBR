@@ -14,7 +14,10 @@
 - [`exercicios.md`](exercicios.md) — exercícios
 
 > **Este capítulo não treina nada.** Ele usa os pesos que o Capítulo 11 salvou em
-> `modelo.pt`. Nenhum número de qualidade muda aqui — e é exatamente esse o ponto: a
+> [`modelo.pt`](../11-datasets/modelo.pt) — que está **versionado no repositório** (8,6 MB),
+> então tudo aqui roda logo após o clone, sem esperar os 18 minutos de treino do Cap. 11.
+>
+> Nenhum número de qualidade muda neste capítulo — e é exatamente esse o ponto: a
 > otimização precisa ser **invisível na saída** e visível só no relógio.
 
 ---

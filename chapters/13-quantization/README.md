@@ -8,6 +8,8 @@
 **Pré-requisitos:** Capítulos 9 (precisão), 11 (o modelo treinado) e 12 (por que o decode
 é limitado por memória).
 
+> O checkpoint do Capítulo 11 está **versionado** — tudo aqui roda logo após o clone.
+
 **Arquivos:**
 - [`quantizacao.py`](quantizacao.py) — a aritmética do zero: escala, zero-point, per-channel
 - [`quantizar_modelo.py`](quantizar_modelo.py) — aplica ao modelo do Cap. 11 e mede
