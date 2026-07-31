@@ -7,11 +7,11 @@
 
 ## 1. Resumo executivo
 
-O projeto tem hoje uma **base sólida e publicada**: as **Fases I e II estão completas**
-— o **Transformer**, o **tokenizador** e o **treino afinado** já estão construídos — e a
-**Fase III está completa** e a Fase IV começou. São **11 capítulos** prontos, testados e no GitHub. Cada
-capítulo entregue inclui apostila, código executável, exercícios com soluções e PDF — e
-todo número citado no texto foi obtido rodando o código de verdade.
+O projeto tem hoje uma **base sólida e publicada**: as **Fases I, II e III estão
+completas** — o Transformer, o tokenizador, o treino afinado e o pipeline de dados — e a
+**Fase IV está pela metade**. São **13 capítulos** prontos, testados e no GitHub. Cada
+capítulo entregue inclui apostila, código executável, exercícios com gabarito **medido** e
+PDF — e todo número citado no texto foi obtido rodando o código de verdade.
 
 **O marco:** o curso já entrega um **GPT funcional** com **tokenizador próprio**. A
 arquitetura do Capítulo 5 é, em estrutura, a mesma do GPT-2, e o BPE do Capítulo 6 é o
@@ -19,14 +19,14 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 
 | Indicador | Valor |
 |-----------|-------|
-| Capítulos concluídos | **11 de 17** (65%) |
-| Estado | Fases I, II e III completas; Fase IV por começar |
-| Modelo atual | Transformer de 2,2 M params escrevendo **prosa em português** (perplexidade 51,7) |
-| Repositório | Publicado e versionado (21 commits) |
-| Arquivos versionados | 125 |
-| Linhas de código (didático) | ~9.500 (Python) |
-| **Exercícios com gabarito medido** | **78 de 78 (100%)** |
-| PDFs gerados | 11 capítulos + gabaritos (52 pág.) + panorama + este relatório |
+| Capítulos concluídos | **13 de 17** (76%) |
+| Estado | Fases I, II e III completas; Fase IV em 2/4 |
+| Modelo atual | Transformer de 2,2 M params escrevendo **prosa em português** (perplexidade 51,3) |
+| Repositório | Publicado e versionado (24 commits) |
+| Arquivos versionados | 133 |
+| Linhas de código (didático) | ~10.200 (Python) |
+| **Exercícios com gabarito medido** | **92 de 92 (100%)** |
+| PDFs gerados | 13 capítulos + gabaritos + panorama + este relatório |
 | Verificação | 100% do código roda; todo gabarito vem de execução, não de memória |
 
 ---
@@ -53,7 +53,10 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 | `b1b0318` | 01/06/2026 | Capítulo 08 — Device (CPU/GPU), medido na Radeon |
 | `6f106c1` | 01/06/2026 | Capítulo 09 — Precision (fp16/bf16, loss scaling) |
 | `5d0c47f` | 01/06/2026 | Capítulo 10 — Distributed (fecha a Fase III) |
-| (atual) | 01/06/2026 | Capítulo 11 — Datasets (a virada para prosa) |
+| `27870ea` | 30/07/2026 | Capítulo 11 — Datasets, e gabaritos dos capítulos 1–11 |
+| `bb34942` | 30/07/2026 | Capítulo 12 — Inference I: KV-cache |
+| `0ea8470` | 30/07/2026 | E7 do cap. 11 e E4 do cap. 12 refeitos no orçamento cheio |
+| (atual) | 30/07/2026 | Capítulo 13 — Inference II: Quantization |
 
 ---
 
@@ -89,8 +92,8 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 
 | # | Capítulo | Estado |
 |---|----------|--------|
-| 12 | Inference I: KV-cache | A fazer (próximo) |
-| 13 | Inference II: Quantization | A fazer |
+| 12 | Inference I: KV-cache | **Concluído** |
+| 13 | Inference II: Quantization | **Concluído** |
 | 14 | Finetuning I: SFT | A fazer |
 | 15 | Finetuning II: RL | A fazer |
 
@@ -108,9 +111,9 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 | I — Fundamentos (cap. 1–3) | 3 / 3 | **100%** |
 | II — Transformer (cap. 4–7) | 4 / 4 | **100%** |
 | III — Velocidade e escala (cap. 8–11) | 4 / 4 | **100%** |
-| IV — Inferência e refinamento (cap. 12–15) | 0 / 4 | 0% |
+| IV — Inferência e refinamento (cap. 12–15) | 2 / 4 | 50% |
 | V — Produto e além (cap. 16–17) | 0 / 2 | 0% |
-| **TOTAL** | **11 / 17** | **65%** |
+| **TOTAL** | **13 / 17** | **76%** |
 
 ---
 

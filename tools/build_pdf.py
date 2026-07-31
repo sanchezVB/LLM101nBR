@@ -74,6 +74,7 @@ EMOJI_REPLACEMENTS = {
     "−": "-",     # U+2212 MINUS SIGN (diferente do hifen ASCII!)
     "–": "-",     # en dash
     "≫": ">>",    # U+226B  (muito maior que)
+    "‖": "||",  # U+2016 DOUBLE VERTICAL LINE (norma de vetor)
     "≪": "<<",
     # sobrescritos
     "ᵀ": "T",
