@@ -100,6 +100,22 @@ python tools/build_pdf.py --gabaritos     # gera docs/LLM101n-BR-Gabaritos.pdf
 > decisão consciente. O [`docs/LLM101n-BR-Gabaritos.pdf`](docs/LLM101n-BR-Gabaritos.pdf)
 > reúne todos os gabaritos comentados, com os **números medidos** de cada experimento.
 
+### Conferindo que tudo ainda roda
+
+Um curso com 65 scripts apodrece em silêncio. O `smoke_test.py` roda **todos** e diz o
+estado de cada um:
+
+```bash
+python tools/smoke_test.py
+```
+
+Como a maioria dos scripts treina modelos e leva minutos, o critério de aprovação é
+`OK` (terminou) ou `RODANDO` (não terminou, mas estava produzindo saída — ou seja,
+arrancou: imports resolvidos, dados carregados). A maioria esmagadora das quebras
+acontece nos primeiros segundos.
+
+Última execução: **61 scripts, 38 ok, 22 rodando, 1 pulado, nenhuma falha.**
+
 ---
 
 ## Syllabus (programa do curso)
