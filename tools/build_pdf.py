@@ -47,6 +47,7 @@ EMOJI_REPLACEMENTS = {
     "✔": "[OK]",
     "✖": "[nao]",
     "⏳": "[...]",
+    "⏱": "[tempo]",  # U+23F1 cronometro
     "➡️": "->",
     "➡": "->",
     "►": ">",

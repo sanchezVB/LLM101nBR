@@ -107,17 +107,25 @@ normalização eles mudam.
 
 Recompensa `pontos` (mal especificada), 400 passos, partindo de loss 4,0784:
 
-| β | Recompensa | KL | Loss real | **Custo** | Resposta gerada |
+| β | Recompensa | KL | Loss real | **Custo** | Regime |
 |---|---|---|---|---|---|
-| **0,00** | 0,058 → **0,996** | 14,87 | 4,8211 | **+0,7427** | `'. '` |
-| 0,02 | 0,058 → 0,958 | 11,63 | 4,3963 | +0,3179 | `'.'` |
-| **0,10** | 0,055 → 0,218 | 1,41 | 4,0832 | **+0,0048** | `'é esta especie de minha mãe ao discurs'` |
+| **0,00** | 0,058 → **0,996** | 14,87 | 4,8211 | **+0,7427** | hackeia por completo — `'. '` |
+| 0,02 | 0,058 → 0,958 | 11,63 | 4,3963 | +0,3179 | hackeia quase igual — `'.'` |
+| **0,10** | 0,055 → **0,218** | 1,41 | 4,0832 | **+0,0048** | **aprende sem custo** |
+| 0,50 | 0,053 → 0,064 | 0,31 | 4,0810 | +0,0026 | mal se move |
+| 2,00 | 0,053 → 0,055 | 0,23 | 4,0800 | +0,0016 | congelado |
 
-*(β = 0,5 e β = 2,0 em medição — ver nota ao fim desta seção.)*
+**1. A faixa útil existe, é β ≈ 0,1 — e é um ponto só.**
 
-**1. A faixa útil existe, e é β ≈ 0,1 nesta configuração.** A recompensa quadruplica
-(0,055 → 0,218), a KL fica em 1,41 em vez de 14,87, e o custo em português é **+0,005** —
-indistinguível de zero. E a resposta volta a ser texto.
+Em β = 0,10 a recompensa quadruplica (0,055 → 0,218), a KL cai de 14,87 para 1,41, e o
+custo em português é **+0,005**, indistinguível de zero. A resposta volta a ser texto.
+
+De um lado dele, em β = 0,02, o modelo hackeia quase completo. Do outro, em β = 0,5, ele
+paralisa: a recompensa sobe 0,011 em 400 passos. **Um fator de cinco para cada lado**, e a
+janela fecha.
+
+Isso é desconfortável, e é o resultado. O β não é um parâmetro que você ajusta "mais ou
+menos" — é uma escolha entre três regimes qualitativamente diferentes, e só um deles serve.
 
 **2. A transição entre 0,02 e 0,10 é abrupta, e o motivo é estrutural.**
 
@@ -135,12 +143,22 @@ em vez de uma rampa.
 > É a mesma forma do precipício entre 4 e 3 bits no [Capítulo 13](../../13-quantization/solucoes/gabarito.md):
 > um parâmetro contínuo produzindo um comportamento com limiar.
 
-**3. Custo zero não é sucesso.** Com β grande a política mal se move: a KL vai a quase
-zero, o custo em português também — e a recompensa **não sobe**. O modelo não aprendeu
-nada; ele foi impedido de aprender.
+**3. Custo zero não é sucesso — e as duas últimas linhas provam.**
+
+Em β = 0,5 o custo é **+0,0026**, quase metade do custo em β = 0,10. Pela coluna do custo,
+seria a melhor configuração da tabela.
+
+Olhe a recompensa: **0,053 → 0,064**. Em 400 passos, o modelo aprendeu 0,011. Ele não foi
+protegido; foi **impedido de aprender**. Em β = 2,0 isso fica explícito — KL de 0,23, e a
+política praticamente não se moveu do ponto de partida.
+
+> É o mesmo formato de erro que o [Capítulo 13](../../13-quantization/solucoes/gabarito.md)
+> encontrou na quantização: uma métrica que parece boa porque o sistema **não está fazendo
+> nada**. Lá era o erro global escondendo linhas zeradas; aqui é o custo baixo escondendo
+> um modelo que não treinou.
 
 Por isso a tabela precisa das **duas** colunas. Otimizar só o custo leva ao β infinito, que
-é o mesmo que não treinar.
+é exatamente o mesmo que não treinar — e tem custo zero.
 
 ---
 

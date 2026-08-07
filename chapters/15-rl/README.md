@@ -181,10 +181,27 @@ estrago cai pela metade, e é só.
 
 A penalidade de KL **compra tempo e limita o dano**. Não substitui uma recompensa correta.
 
-A pergunta que sobra é quantitativa: existe um β que segura de verdade? E existe uma faixa
-em que a recompensa sobe *e* o custo fica pequeno? O
-[`e4_dial_do_kl.py`](solucoes/e4_dial_do_kl.py) varre o β para responder — e o resultado
-está no [gabarito](solucoes/gabarito.md).
+### E a faixa útil é um ponto só
+
+Varrendo o β com [`e4_dial_do_kl.py`](solucoes/e4_dial_do_kl.py):
+
+| β | Recompensa | KL | Custo em português | Regime |
+|---|---|---|---|---|
+| 0,00 | 0,058 → **0,996** | 14,87 | **+0,743** | hackeia por completo |
+| 0,02 | 0,058 → 0,958 | 11,63 | +0,318 | hackeia quase igual |
+| **0,10** | 0,055 → **0,218** | 1,41 | **+0,005** | **aprende sem custo** |
+| 0,50 | 0,053 → 0,064 | 0,31 | +0,003 | mal se move |
+| 2,00 | 0,053 → 0,055 | 0,23 | +0,002 | congelado |
+
+Só **β = 0,10** tem as duas coisas: recompensa subindo e custo indistinguível de zero. Um
+fator de cinco para baixo e o modelo hackeia; um fator de cinco para cima e ele paralisa.
+
+E note a armadilha das duas últimas linhas: em β = 0,5 o custo é **menor** que em β = 0,10.
+Pela coluna do custo, seria a melhor configuração — mas a recompensa subiu 0,011 em 400
+passos. O modelo não foi protegido; foi impedido de aprender.
+
+> **Custo zero é o que você obtém não treinando.** Uma métrica de segurança que melhora
+> quando o sistema para de funcionar não está medindo segurança.
 
 ---
 
