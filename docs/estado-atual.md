@@ -9,7 +9,7 @@
 
 O projeto tem hoje uma **base sólida e publicada**: as **Fases I, II e III estão
 completas** — o Transformer, o tokenizador, o treino afinado e o pipeline de dados — e a
-**Fase IV está completa**. São **15 capítulos** prontos, testados e no GitHub. Cada
+**Fase IV está completa** e a V começou. São **16 capítulos** prontos, testados e no GitHub. Cada
 capítulo entregue inclui apostila, código executável, exercícios com gabarito **medido** e
 PDF — e todo número citado no texto foi obtido rodando o código de verdade.
 
@@ -19,14 +19,14 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 
 | Indicador | Valor |
 |-----------|-------|
-| Capítulos concluídos | **15 de 17** (88%) |
-| Estado | Fases I a IV **completas**; falta só a Fase V (cap. 16–17) |
+| Capítulos concluídos | **16 de 17** (94%) |
+| Estado | Falta apenas o Capítulo 17 (Multimodal) |
 | Modelo atual | Transformer de 2,2 M params escrevendo **prosa em português** (perplexidade 51,3) |
-| Repositório | Publicado e versionado (32 commits) |
-| Arquivos versionados | 162 |
-| Linhas de código (didático) | ~12.600 (Python) |
-| **Exercícios com gabarito medido** | **106 de 106 (100%)** |
-| PDFs gerados | 15 capítulos + gabaritos + panorama + este relatório |
+| Repositório | Publicado e versionado (36 commits) |
+| Arquivos versionados | 169 |
+| Linhas de código (didático) | ~13.200 (Python) |
+| **Exercícios com gabarito medido** | **113 de 113 (100%)** |
+| PDFs gerados | 16 capítulos + gabaritos + panorama + este relatório |
 | Verificação | `smoke_test.py`: 61 scripts, **nenhuma falha**; todo gabarito vem de execução |
 
 ---
@@ -59,7 +59,8 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 | `3e9a403` | 30/07/2026 | Capítulo 13 — Inference II: Quantization |
 | `b9620bc` | 30/07/2026 | Smoke test do curso inteiro (achou 3 bugs) |
 | `6477080` | 30/07/2026 | Capítulo 14 — Finetuning I: SFT |
-| (atual) | 02/08/2026 | Capítulo 15 — Finetuning II: RL (fecha a Fase IV) |
+| `9bd4356` | 02/08/2026 | Capítulo 15 — Finetuning II: RL (fecha a Fase IV) |
+| (atual) | 07/08/2026 | Capítulo 16 — Deployment |
 
 ---
 
@@ -104,7 +105,7 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 
 | # | Capítulo | Estado |
 |---|----------|--------|
-| 16 | Deployment | A fazer |
+| 16 | Deployment | **Concluído** |
 | 17 | Multimodal | A fazer |
 
 **Progresso por fase:**
@@ -115,8 +116,8 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 | II — Transformer (cap. 4–7) | 4 / 4 | **100%** |
 | III — Velocidade e escala (cap. 8–11) | 4 / 4 | **100%** |
 | IV — Inferência e refinamento (cap. 12–15) | 4 / 4 | **100%** |
-| V — Produto e além (cap. 16–17) | 0 / 2 | 0% |
-| **TOTAL** | **15 / 17** | **88%** |
+| V — Produto e além (cap. 16–17) | 1 / 2 | 50% |
+| **TOTAL** | **16 / 17** | **94%** |
 
 ---
 

@@ -175,10 +175,10 @@ Trabalhados ao longo dos capítulos, conforme aparecem:
 | 13 — Inference II: Quantization | ✅ Completo (apostila + código + exercícios + PDF) |
 | 14 — Finetuning I: SFT | ✅ Completo (apostila + código + exercícios + PDF) |
 | 15 — Finetuning II: RL | ✅ Completo (apostila + código + exercícios + PDF) |
-| 16 — Deployment | ⏳ Em construção |
-| 17 — Multimodal | ⏳ Planejado |
+| 16 — Deployment | ✅ Completo (apostila + código + exercícios + PDF) |
+| 17 — Multimodal | ⏳ Em construção |
 
-**15 de 17 capítulos concluídos.** Fases I a IV completas; falta a Fase V.
+**16 de 17 capítulos concluídos.** Falta apenas o Capítulo 17 (Multimodal).
 
 > Este repositório é construído **em fases**. O Capítulo 1 é a "fatia vertical" de
 > referência: define o padrão de qualidade (profundidade do texto, estilo do código,
