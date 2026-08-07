@@ -171,7 +171,14 @@ Trabalhados ao longo dos capítulos, conforme aparecem:
 | 09 — Precision | ✅ Completo (apostila + código + exercícios + PDF) |
 | 10 — Distributed | ✅ Completo (apostila + código + exercícios + PDF) |
 | 11 — Datasets | ✅ Completo (apostila + código + exercícios + PDF) |
-| 12–17 | ⏳ Planejados (syllabus aprovado) |
+| 12 — Inference I: KV-cache | ✅ Completo (apostila + código + exercícios + PDF) |
+| 13 — Inference II: Quantization | ✅ Completo (apostila + código + exercícios + PDF) |
+| 14 — Finetuning I: SFT | ✅ Completo (apostila + código + exercícios + PDF) |
+| 15 — Finetuning II: RL | ✅ Completo (apostila + código + exercícios + PDF) |
+| 16 — Deployment | ⏳ Em construção |
+| 17 — Multimodal | ⏳ Planejado |
+
+**15 de 17 capítulos concluídos.** Fases I a IV completas; falta a Fase V.
 
 > Este repositório é construído **em fases**. O Capítulo 1 é a "fatia vertical" de
 > referência: define o padrão de qualidade (profundidade do texto, estilo do código,
