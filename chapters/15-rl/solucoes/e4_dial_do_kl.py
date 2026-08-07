@@ -10,7 +10,12 @@ onde fica a fronteira entre 'a politica hackeia' e 'a politica nao sai do
 lugar'? E existe uma faixa util no meio?
 
 Run (a partir da pasta do capitulo):
-    python solucoes/e4_dial_do_kl.py
+    python solucoes/e4_dial_do_kl.py                    # varredura completa
+    python solucoes/e4_dial_do_kl.py 0.1 0.5 2.0        # so' alguns betas
+
+O segundo modo existe porque a varredura completa leva ~1h20 e o pipeline e'
+DETERMINISTICO -- o beta 0.0 reproduziu 0.996 / KL 14.87 / loss 4.8211 em tres
+execucoes separadas. Refazer um beta ja' medido nao acrescenta nada.
 """
 
 import sys
@@ -40,7 +45,8 @@ print(f"  loss de partida em Machado: {loss_base:.4f}\n")
 print(f"  {'beta':>8s} {'recompensa':>18s} {'KL':>8s} {'loss real':>11s} "
       f"{'custo':>9s}   amostra")
 
-for beta in (0.0, 0.02, 0.1, 0.5, 2.0):
+BETAS = [float(a) for a in sys.argv[1:]] or [0.0, 0.02, 0.1, 0.5, 2.0]
+for beta in BETAS:
     pol, ref, hist, _ = treinar("pontos", beta=beta, passos=PASSOS, verbose=False)
     r0 = float(np.mean([h[0] for h in hist[:10]]))
     r1 = float(np.mean([h[0] for h in hist[-10:]]))
