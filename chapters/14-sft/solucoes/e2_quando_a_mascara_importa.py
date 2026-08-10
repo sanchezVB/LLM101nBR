@@ -78,15 +78,24 @@ CASOS = [
     ("104 / ~12", 104, 4, 18),
 ]
 
+# Um arquivo SEPARADO, e nao o sft_dados.npz do capitulo.
+#
+# A primeira versao deste script sobrescrevia o dataset do capitulo e o
+# regenerava no fim. Isso e' correto enquanto o script termina. Interrompa-o no
+# meio -- Ctrl+C, ou o timeout do smoke test -- e o capitulo inteiro fica com um
+# dataset truncado que ninguem pediu, e o proximo script treina sobre ele em
+# silencio. Um arquivo proprio elimina a possibilidade, em vez de administra'-la.
+TEMP = CAP / "_sft_dados_e2.npz"
+
 for rotulo, tp, rmin, rmax in CASOS:
     Xtr, Ytr, Xva, Yva = montar_com(tp, rmin, rmax)
     frac = fracao_de_pedido(Xtr, Ytr)
 
-    # salva um npz temporario, porque finetune() le' de arquivo
-    np.savez_compressed(CAP / "sft_dados.npz",
-                        Xtr=Xtr, Ytr=Ytr, Xva=Xva, Yva=Yva)
-    _, l_com, _ = finetune(mascarar=True, passos=PASSOS, verbose=False)
-    _, l_sem, _ = finetune(mascarar=False, passos=PASSOS, verbose=False)
+    np.savez_compressed(TEMP, Xtr=Xtr, Ytr=Ytr, Xva=Xva, Yva=Yva)
+    _, l_com, _ = finetune(mascarar=True, passos=PASSOS, verbose=False,
+                           dados_npz=TEMP)
+    _, l_sem, _ = finetune(mascarar=False, passos=PASSOS, verbose=False,
+                           dados_npz=TEMP)
     print(f"  {rotulo:>18s} {frac:>8.0%} {l_com:>13.4f} {l_sem:>13.4f} "
           f"{l_sem - l_com:>+11.4f}", flush=True)
 
@@ -110,11 +119,7 @@ print("""
   quase sempre quer dizer 'nao faz diferenca AQUI', e vale descobrir onde e' o
   aqui.""")
 
-# devolve o dataset original
-print("\n  (regenerando sft_dados.npz com a configuracao padrao do capitulo)")
-import subprocess
-subprocess.run([sys.executable, str(CAP / "preparar_sft.py")],
-               cwd=CAP, stdout=subprocess.DEVNULL)
+# Nada a restaurar: o sft_dados.npz do capitulo nunca foi tocado.
 
 
 # ===========================================================================
@@ -130,7 +135,7 @@ if __name__ == "__main__":
     print("Quanto varia so' pela semente? (o piso de ruido)")
     print("=" * 74)
     Xtr, Ytr, Xva, Yva = montar_com(104, 4, 18)     # o caso de pedido longo
-    np.savez_compressed(CAP / "sft_dados.npz", Xtr=Xtr, Ytr=Ytr, Xva=Xva, Yva=Yva)
+    np.savez_compressed(TEMP, Xtr=Xtr, Ytr=Ytr, Xva=Xva, Yva=Yva)
 
     SEMENTES = (1337, 42, 2024, 7, 99, 555)
     print(f"  configuracao 104/~12, {len(SEMENTES)} sementes por variante")
@@ -138,8 +143,10 @@ if __name__ == "__main__":
     print(f"  {'semente':>9s} {'com mascara':>13s} {'sem mascara':>13s} {'diferenca':>11s}")
     difs, coms = [], []
     for s in SEMENTES:
-        _, lc, _ = finetune(mascarar=True, passos=PASSOS, verbose=False, semente=s)
-        _, ls, _ = finetune(mascarar=False, passos=PASSOS, verbose=False, semente=s)
+        _, lc, _ = finetune(mascarar=True, passos=PASSOS, verbose=False,
+                            semente=s, dados_npz=TEMP)
+        _, ls, _ = finetune(mascarar=False, passos=PASSOS, verbose=False,
+                            semente=s, dados_npz=TEMP)
         coms.append(lc)
         difs.append(ls - lc)
         print(f"  {s:>9d} {lc:>13.4f} {ls:>13.4f} {ls-lc:>+11.4f}", flush=True)
@@ -188,6 +195,4 @@ if __name__ == "__main__":
   VEREDITO: apenas {positivas}/{n} na direcao prevista. A tendencia da tabela
   inicial NAO se sustenta: era ruido.""")
 
-    print("\n  (regenerando sft_dados.npz com a configuracao padrao)")
-    subprocess.run([sys.executable, str(CAP / "preparar_sft.py")],
-                   cwd=CAP, stdout=subprocess.DEVNULL)
+    TEMP.unlink(missing_ok=True)

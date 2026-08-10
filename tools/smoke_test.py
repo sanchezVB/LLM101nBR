@@ -30,6 +30,7 @@ import argparse
 import os
 import subprocess
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -58,8 +59,41 @@ def scripts_do_curso(filtro_capitulo=None):
             yield ch, py
 
 
+def _matar_arvore(p):
+    """Mata o processo E OS FILHOS DELE.
+
+    p.kill() mata so' o processo direto. Varios scripts do curso lancam
+    subprocessos -- o gabarito do cap. 10 provoca deadlocks de proposito -- e os
+    netos sobrevivem, segurando o pipe de saida aberto.
+    """
+    if os.name == "nt":
+        subprocess.run(["taskkill", "/F", "/T", "/PID", str(p.pid)],
+                       capture_output=True)
+    else:
+        import signal
+        try:
+            os.killpg(os.getpgid(p.pid), signal.SIGKILL)
+        except (ProcessLookupError, PermissionError):
+            pass
+    p.kill()
+
+
 def rodar(py, cwd, timeout):
-    """Devolve (estado, detalhe, segundos)."""
+    """Devolve (estado, detalhe, segundos).
+
+    A saida e' drenada por uma THREAD, e nao por communicate(). O motivo e' um
+    bug que travou este script por completo:
+
+      p.kill(); p.communicate()      # <- espera para sempre
+
+    communicate() espera o pipe chegar a EOF. Se o processo morto tiver deixado
+    NETOS vivos, eles ainda seguram a ponta de escrita, o EOF nunca chega, e o
+    smoke test congela. Foi o que aconteceu no capitulo 10, e a execucao inteira
+    do curso parou ali -- reportando exit 0, o que tornou o diagnostico pior.
+
+    Com a thread leitora, o que ja' foi produzido esta' sempre disponivel, e a
+    thread e' daemon: se ela ficar presa num read, nao impede o programa de sair.
+    """
     t0 = time.perf_counter()
     env = dict(os.environ, PYTHONIOENCODING="utf-8")
     try:
@@ -67,16 +101,32 @@ def rodar(py, cwd, timeout):
                               else str(py.relative_to(cwd))],
                              cwd=cwd, stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT, text=True,
-                             encoding="utf-8", errors="replace", env=env)
+                             encoding="utf-8", errors="replace", env=env,
+                             bufsize=1)
     except OSError as e:
         return "FALHOU", f"nao executou: {e}", 0.0
 
+    linhas_lidas = []
+
+    def drenar():
+        try:
+            for linha in p.stdout:
+                linhas_lidas.append(linha)
+        except Exception:
+            pass
+
+    leitor = threading.Thread(target=drenar, daemon=True)
+    leitor.start()
+
     try:
-        saida, _ = p.communicate(timeout=timeout)
+        p.wait(timeout=timeout)
+        leitor.join(timeout=3)
+        saida = "".join(linhas_lidas)
         dt = time.perf_counter() - t0
     except subprocess.TimeoutExpired:
-        p.kill()
-        saida, _ = p.communicate()
+        _matar_arvore(p)
+        leitor.join(timeout=3)
+        saida = "".join(linhas_lidas)
         dt = time.perf_counter() - t0
         # produziu saida antes de ser morto? entao arrancou.
         if saida and saida.strip():

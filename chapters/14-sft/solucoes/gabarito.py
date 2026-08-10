@@ -32,21 +32,25 @@ from dataset import carregar as carregar_dados, pegar_batch
 
 PASSOS = 400
 # MATERIALIZAR AGORA. np.load devolve um NpzFile PREGUICOSO, que le' do disco a
-# cada acesso -- e o E5 sobrescreve este mesmo arquivo. Sem o dict() abaixo, o
-# segundo acesso le' um arquivo que ja' foi trocado ("BadZipFile: Truncated file
-# header"). Foi assim que este script quebrou na primeira execucao.
+# cada acesso. Enquanto o E5 sobrescrevia este mesmo arquivo, o segundo acesso
+# lia um arquivo ja' trocado ("BadZipFile: Truncated file header"), e foi assim
+# que este script quebrou na primeira execucao. O E5 hoje usa um arquivo proprio,
+# mas o dict() fica: depender de quando o numpy resolve ler nao e' uma garantia.
 with np.load(CAP / "sft_dados.npz") as _z:
     DADOS = {k: _z[k] for k in _z.files}
 
 # GUARDA CONTRA ESTADO CORROMPIDO, e ela existe por um motivo concreto.
 #
-# O E5 abaixo SOBRESCREVE o sft_dados.npz com subconjuntos menores e o restaura
-# no fim. Se o script morrer no meio (foi o que aconteceu na primeira execucao,
-# por causa da leitura preguicosa do np.load), o arquivo fica truncado -- e a
-# execucao SEGUINTE o carrega sem reclamar.
+# Havia dois scripts que sobrescreviam o sft_dados.npz com subconjuntos menores
+# e o restauravam no fim -- o E5 daqui e o E2. Morrendo no meio, deixavam o
+# arquivo truncado, e a execucao SEGUINTE o carregava sem reclamar. Uma rodada
+# inteira do E4, E5 e E6 saiu com 500 exemplos em vez de 8.000, produzindo
+# numeros plausiveis e errados. Nada avisou.
 #
-# Foi assim que uma rodada inteira do E4, E5 e E6 saiu com 500 exemplos em vez
-# de 8.000, produzindo numeros plausiveis e errados. Nada avisou.
+# A CAUSA foi eliminada: os dois agora escrevem em arquivos proprios. A guarda
+# fica assim mesmo -- ela custa tres linhas e verifica a premissa em vez de
+# confiar nela. Foi ela que denunciou o problema quando o smoke test matou o E2
+# no meio do laco, na epoca em que ele ainda mexia no arquivo do capitulo.
 ESPERADO = 8000
 if DADOS["Xtr"].shape[0] != ESPERADO:
     raise SystemExit(
@@ -132,15 +136,16 @@ print("=" * 74)
 print("E5 — quantos exemplos bastam?")
 print("=" * 74)
 Xtr_full, Ytr_full = DADOS["Xtr"], DADOS["Ytr"]
+TEMP = CAP / "_sft_dados_e5.npz"        # NAO o arquivo do capitulo -- veja acima
 print(f"  {'exemplos':>10s} {'loss na resposta':>18s} {'taxa de parada':>16s}")
 for n_ex in (500, 2000, 8000):
-    np.savez_compressed(CAP / "sft_dados.npz",
+    np.savez_compressed(TEMP,
                         Xtr=Xtr_full[:n_ex], Ytr=Ytr_full[:n_ex],
                         Xva=DADOS["Xva"], Yva=DADOS["Yva"])
-    m, l, _ = finetune(passos=PASSOS, verbose=False)
+    m, l, _ = finetune(passos=PASSOS, verbose=False, dados_npz=TEMP)
     r = medir(m, pedidos, "")
     print(f"  {n_ex:>10,} {l:>18.4f} {r['taxa']:>15.0%}", flush=True)
-np.savez_compressed(CAP / "sft_dados.npz", **DADOS)   # devolve o original
+TEMP.unlink(missing_ok=True)
 print("""
   Respostas:
   1. AS DUAS METRICAS SE SEPARAM, e essa e' a resposta.

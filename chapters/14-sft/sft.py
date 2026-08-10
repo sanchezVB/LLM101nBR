@@ -102,8 +102,15 @@ def avaliar(m, X, Y, n=20, semente=7):
 
 
 # ===========================================================================
-def finetune(mascarar=True, passos=PASSOS, verbose=True, semente=1337):
-    dados = np.load(AQUI / "sft_dados.npz")
+def finetune(mascarar=True, passos=PASSOS, verbose=True, semente=1337,
+             dados_npz=None):
+    # `dados_npz` existe para que os exercicios possam treinar sobre datasets
+    # ALTERNATIVOS sem tocar no arquivo do capitulo. A primeira versao nao tinha
+    # esse parametro: os exercicios sobrescreviam sft_dados.npz e o restauravam
+    # no fim. Funciona ate' a execucao ser interrompida no meio -- e ai' o
+    # dataset do capitulo fica truncado, e o proximo script treina sobre ele sem
+    # avisar nada. Foi o que o smoke test provocou, matando o E2 no meio do laco.
+    dados = np.load(dados_npz or (AQUI / "sft_dados.npz"))
     Xtr = torch.from_numpy(dados["Xtr"])
     Ytr = torch.from_numpy(dados["Ytr"])
     Xva = torch.from_numpy(dados["Xva"])
