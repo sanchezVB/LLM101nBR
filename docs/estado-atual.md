@@ -27,7 +27,7 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 | Linhas de código (didático) | ~13.200 (Python) |
 | **Exercícios com gabarito medido** | **113 de 113 (100%)** |
 | PDFs gerados | 17 capítulos + gabaritos + panorama + este relatório |
-| Verificação | `smoke_test.py`: 61 scripts, **nenhuma falha**; todo gabarito vem de execução |
+| Verificação | `smoke_test.py`: 78 scripts nos 17 capítulos, **nenhuma falha**; todo gabarito vem de execução |
 
 ---
 

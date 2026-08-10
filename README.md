@@ -102,7 +102,7 @@ python tools/build_pdf.py --gabaritos     # gera docs/LLM101n-BR-Gabaritos.pdf
 
 ### Conferindo que tudo ainda roda
 
-Um curso com 65 scripts apodrece em silêncio. O `smoke_test.py` roda **todos** e diz o
+Um curso com 78 scripts apodrece em silêncio. O `smoke_test.py` roda **todos** e diz o
 estado de cada um:
 
 ```bash
@@ -114,7 +114,21 @@ Como a maioria dos scripts treina modelos e leva minutos, o critério de aprova�
 arrancou: imports resolvidos, dados carregados). A maioria esmagadora das quebras
 acontece nos primeiros segundos.
 
-Última execução: **61 scripts, 38 ok, 22 rodando, 1 pulado, nenhuma falha.**
+Última execução, os 17 capítulos: **78 scripts, 42 ok, 34 rodando, 2 pulados, nenhuma
+falha.** Os dois pulados pedem um pré-requisito e dizem qual: o Capítulo 3 quer o CSV do
+IBGE, e o `carga.py` do Capítulo 16 quer o servidor rodando em outro terminal.
+
+> Vale contar como esta linha estava errada até hoje, porque o erro é instrutivo.
+>
+> Ela dizia *61 scripts, 38 ok, 22 rodando* — números de uma execução que **travava no
+> Capítulo 10 e terminava com código de saída 0**. Os capítulos 11 a 17 nunca eram
+> verificados, e nada indicava isso. A causa era um `p.communicate()` sem timeout depois de
+> um `p.kill()`: matar o processo não fecha o pipe quando os *netos* herdaram a ponta de
+> escrita, e o gabarito do Capítulo 10 lança subprocessos que travam de propósito.
+>
+> Um teste que falha em silêncio e se declara aprovado é pior que não ter teste — ele
+> compra confiança sem entregar nada. E, uma vez destravado, o primeiro achado dele foi um
+> bug real no Capítulo 14.
 
 ---
 
