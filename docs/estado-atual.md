@@ -7,9 +7,9 @@
 
 ## 1. Resumo executivo
 
-O projeto tem hoje uma **base sólida e publicada**: as **Fases I, II e III estão
-completas** — o Transformer, o tokenizador, o treino afinado e o pipeline de dados — e a
-**Fase IV está completa** e a V começou. São **16 capítulos** prontos, testados e no GitHub. Cada
+O curso está **completo e publicado**: **todas as cinco fases** foram entregues, do
+bigrama por contagem ao Transformer multimodal servido por HTTP. São **17 capítulos**
+prontos, testados e no GitHub. Cada
 capítulo entregue inclui apostila, código executável, exercícios com gabarito **medido** e
 PDF — e todo número citado no texto foi obtido rodando o código de verdade.
 
@@ -19,14 +19,14 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 
 | Indicador | Valor |
 |-----------|-------|
-| Capítulos concluídos | **16 de 17** (94%) |
-| Estado | Falta apenas o Capítulo 17 (Multimodal) |
+| Capítulos concluídos | **17 de 17** (100%) |
+| Estado | **Curso completo** — as cinco fases entregues |
 | Modelo atual | Transformer de 2,2 M params escrevendo **prosa em português** (perplexidade 51,3) |
-| Repositório | Publicado e versionado (36 commits) |
+| Repositório | Publicado e versionado (37 commits) |
 | Arquivos versionados | 169 |
 | Linhas de código (didático) | ~13.200 (Python) |
 | **Exercícios com gabarito medido** | **113 de 113 (100%)** |
-| PDFs gerados | 16 capítulos + gabaritos + panorama + este relatório |
+| PDFs gerados | 17 capítulos + gabaritos + panorama + este relatório |
 | Verificação | `smoke_test.py`: 61 scripts, **nenhuma falha**; todo gabarito vem de execução |
 
 ---
@@ -60,7 +60,8 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 | `b9620bc` | 30/07/2026 | Smoke test do curso inteiro (achou 3 bugs) |
 | `6477080` | 30/07/2026 | Capítulo 14 — Finetuning I: SFT |
 | `9bd4356` | 02/08/2026 | Capítulo 15 — Finetuning II: RL (fecha a Fase IV) |
-| (atual) | 07/08/2026 | Capítulo 16 — Deployment |
+| `f7f55fc` | 07/08/2026 | Capítulo 16 — Deployment |
+| (atual) | 07/08/2026 | Capítulo 17 — Multimodal (**curso completo**) |
 
 ---
 
@@ -106,7 +107,7 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 | # | Capítulo | Estado |
 |---|----------|--------|
 | 16 | Deployment | **Concluído** |
-| 17 | Multimodal | A fazer |
+| 17 | Multimodal | **Concluído** |
 
 **Progresso por fase:**
 
@@ -116,8 +117,8 @@ mesmo algoritmo que o GPT usa — ambos construídos peça por peça, do zero.
 | II — Transformer (cap. 4–7) | 4 / 4 | **100%** |
 | III — Velocidade e escala (cap. 8–11) | 4 / 4 | **100%** |
 | IV — Inferência e refinamento (cap. 12–15) | 4 / 4 | **100%** |
-| V — Produto e além (cap. 16–17) | 1 / 2 | 50% |
-| **TOTAL** | **16 / 17** | **94%** |
+| V — Produto e além (cap. 16–17) | 2 / 2 | **100%** |
+| **TOTAL** | **17 / 17** | **100%** |
 
 ---
 

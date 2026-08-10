@@ -176,9 +176,9 @@ Trabalhados ao longo dos capítulos, conforme aparecem:
 | 14 — Finetuning I: SFT | ✅ Completo (apostila + código + exercícios + PDF) |
 | 15 — Finetuning II: RL | ✅ Completo (apostila + código + exercícios + PDF) |
 | 16 — Deployment | ✅ Completo (apostila + código + exercícios + PDF) |
-| 17 — Multimodal | ⏳ Em construção |
+| 17 — Multimodal | ✅ Completo (apostila + código + exercícios + PDF) |
 
-**16 de 17 capítulos concluídos.** Falta apenas o Capítulo 17 (Multimodal).
+**17 de 17 capítulos concluídos.** O curso está completo.
 
 > Este repositório é construído **em fases**. O Capítulo 1 é a "fatia vertical" de
 > referência: define o padrão de qualidade (profundidade do texto, estilo do código,

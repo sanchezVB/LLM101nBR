@@ -1,0 +1,4 @@
+_*.txt
+_brutos/
+mnist.npz
+*.pt
