@@ -1,7 +1,12 @@
-# Dependencias APENAS para gerar a apostila em PDF (tools/build_pdf.py).
-# Nao sao necessarias para rodar o codigo do curso.
+# Dependencias APENAS para gerar as apostilas em PDF (tools/build_pdf.py e
+# tools/build_academico.py). Nao sao necessarias para rodar o codigo do curso.
 markdown>=3.5
 pymdown-extensions>=10.0
 pygments>=2.17
 xhtml2pdf>=0.2.16
 pypdf>=4.0
+# reportlab ja' vem como dependencia do xhtml2pdf, mas o build_academico.py o
+# importa DIRETO (para carimbar os numeros de folha). Dependencia usada e' para
+# ser declarada: se o xhtml2pdf trocar de motor um dia, este arquivo continua
+# dizendo a verdade sobre o que o projeto precisa.
+reportlab>=4.0

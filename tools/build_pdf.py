@@ -126,7 +126,12 @@ def clean_emoji(text: str) -> str:
 
 # Caracteres fora do cp1252 que a experiencia mostra que o reportlab consegue
 # renderizar mesmo assim (ele substitui de fontes simbolicas).
-_TOLERADOS = set("≈√∂≤≥≠×÷∞Σαβγδθλμπσφω")
+# ∇ e ∈ foram acrescentados depois de VERIFICAR, e nao por suposicao: um PDF de
+# teste com os dois mostrou o reportlab resolvendo-os pela fonte Symbol, que tem
+# os dois glifos. O aviso abaixo existe para achar quadrado preto -- se ele
+# disparar em caractere que funciona, aprende-se a ignora'-lo, e ai' ele nao
+# serve mais para nada.
+_TOLERADOS = set("≈√∂≤≥≠×÷∞Σαβγδθλμπσφω∇∈")
 
 
 def _avisar_chars_sem_cobertura(text: str):
@@ -237,8 +242,43 @@ def _fix_pre_blocks(html: str) -> str:
     )
 
 
+_RE_ITEM = re.compile(r"^([-*+] |\d+\. )")
+# Linhas que ja' abrem um bloco proprio: uma lista depois delas funciona.
+_RE_ABRE_BLOCO = re.compile(r"^(#{1,6} |\||>|[-*+] |\d+\. |---|===|\s)")
+
+
+def _soltar_listas(md_text: str) -> str:
+    """Insere a linha em branco que o Python-Markdown exige antes de uma lista.
+
+    O GitHub (CommonMark) aceita uma lista colada no paragrafo anterior:
+
+        **Arquivos:**
+        - floats.py -- anatomia de um float
+
+    O Python-Markdown NAO: para ele a lista e' continuacao preguicosa do
+    paragrafo, e o resultado sai como texto corrido com hifens no meio -- que e'
+    como estava saindo em 90 pontos de 26 arquivos, inclusive no PDF ja'
+    publicado. Ninguem percebeu porque no GitHub esta' certo.
+
+    Correcao no pipeline, e nao nos 26 arquivos: o markdown fonte continua valido
+    e identico, e as duas apostilas passam a sair certas de uma vez.
+    """
+    linhas = md_text.split("\n")
+    saida = []
+    em_codigo = False
+    for i, linha in enumerate(linhas):
+        if linha.lstrip().startswith(("```", "~~~")):
+            em_codigo = not em_codigo
+        elif not em_codigo and i and _RE_ITEM.match(linha):
+            anterior = linhas[i - 1]
+            if anterior.strip() and not _RE_ABRE_BLOCO.match(anterior):
+                saida.append("")
+        saida.append(linha)
+    return "\n".join(saida)
+
+
 def md_to_html(md_text: str) -> str:
-    md_text = clean_emoji(md_text)
+    md_text = _soltar_listas(clean_emoji(md_text))
     html = markdown.markdown(md_text, extensions=MD_EXTENSIONS, extension_configs=MD_CONFIGS)
     return _fix_pre_blocks(html)
 

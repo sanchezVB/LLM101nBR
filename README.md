@@ -55,7 +55,9 @@ llm101n-curso/
 ├── SETUP.md                       ← como preparar o ambiente (Python, venv, torch)
 ├── requirements.txt               ← dependências para RODAR o código (torch, ...)
 ├── tools/
-│   ├── build_pdf.py               ← gera a apostila em PDF a partir do Markdown
+│   ├── build_pdf.py               ← gera a apostila didática em PDF
+│   ├── build_academico.py         ← gera a edição acadêmica (ABNT), volume único
+│   ├── smoke_test.py              ← roda todos os scripts do curso e reporta
 │   └── requirements-docs.txt      ← dependências só para gerar PDF
 └── chapters/
     ├── 01-bigram-language-model/
@@ -99,6 +101,36 @@ python tools/build_pdf.py --gabaritos     # gera docs/LLM101n-BR-Gabaritos.pdf
 > seguinte à do exercício não é uma resposta — é uma dica. Abrir outro arquivo é uma
 > decisão consciente. O [`docs/LLM101n-BR-Gabaritos.pdf`](docs/LLM101n-BR-Gabaritos.pdf)
 > reúne todos os gabaritos comentados, com os **números medidos** de cada experimento.
+
+### A edição acadêmica (ABNT)
+
+Há um segundo documento, com finalidade diferente: **um volume único** com tudo dentro —
+capítulos, exercícios e gabaritos — formatado segundo as normas da ABNT.
+
+```bash
+python tools/build_academico.py
+```
+
+Saída: [`docs/LLM101n-BR-Apostila-Academica.pdf`](docs/LLM101n-BR-Apostila-Academica.pdf).
+
+| | Apostila didática | Edição acadêmica |
+|---|---|---|
+| Fonte | Helvetica 10,5 | **Times New Roman 12** |
+| Margens | 2,2 / 1,9 cm | **3 / 2 cm** (NBR 14724) |
+| Seções | títulos coloridos | **numeração progressiva** (NBR 6024) |
+| Gabaritos | arquivo à parte | **Apêndice A**, no mesmo volume |
+| Sumário | — | **com folhas**, conferido entrada a entrada |
+| Referências | — | **NBR 6023**, mais o Apêndice B por capítulo |
+| Extensão | 161 folhas | **299 folhas** |
+
+São dois documentos, e não dois temas de um só: o didático é feito para ler na tela e o
+acadêmico para ser impresso e entregue. Normas aplicadas: NBR 14724, 6023, 6024, 6027 e
+10520.
+
+> **Uma ressalva declarada:** a ABNT pede título e fonte em cada tabela. São mais de 200
+> tabelas no material, e legendá-las é trabalho de conteúdo, não de formatação. Elas saem
+> na diagramação correta — padrão IBGE, laterais abertas, sem grade interna — mas **sem
+> legenda numerada**. É o único item da norma que falta.
 
 ### Conferindo que tudo ainda roda
 
